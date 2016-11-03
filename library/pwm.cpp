@@ -24,13 +24,13 @@ PWM::PWM(int motorNum, int freq) {
 int PWM::setDutyCycle(double duty) {
   if (duty > 1.0) {
     duty = 1.0;
-    cerr << "Duty cycle too high!";
+    //cerr << "Duty cycle too high!";
   } else if (duty < 0.0) {
     duty = 0.0;
   }
 
   if (rc_pwm_set_duty(pwm_ss[num-1], pwm_ch[num-1], duty) == -1) {
-    cerr << "Error in setDutyCycle for motor #" << num << endl;
+    //cerr << "Error in setDutyCycle for motor #" << num << endl;
     return -1;
   }
 

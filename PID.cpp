@@ -123,11 +123,11 @@ double PID::getTorque(int ch) {
  */
 double PID::clip(double number, int min, int max, int err) {
   if (number < min) {
-    if (err) cerr << "\nInvalid value: " << number << " cannot be lower than " << min;
+    //if (err) cerr << "\nInvalid value: " << number << " cannot be lower than " << min;
     number = min;
   }
   if (number > max) {
-    if (err) cerr << "\nInvalid value: " << number << " cannot be higher than " << max;
+    //if (err) cerr << "\nInvalid value: " << number << " cannot be higher than " << max;
     number = max;
   }
 

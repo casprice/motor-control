@@ -28,7 +28,7 @@ using namespace std;
 #define RESOLUTION 16384.0   // 14 bits
 
 // Unit constants
-#define DT 0.1
+#define DT 0.001
 #define RAW_TO_DEG 1
 #define RAW_TO_RAD 2
 #define DEG_TO_RAD 3
