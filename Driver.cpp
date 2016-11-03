@@ -60,7 +60,7 @@ int main(int argc, char * argv[]) {
 
   if (argc == 1) {
       cerr << "Error: Invalid number of arguments. Usage:" << endl;
-      cerr << "  ./Driver [number] [Kp] [Ki]" << endl;
+      cerr << "  " << argv[0] << " [number] [Kp] [Ki]" << endl;
       cerr << "  number: the motor number" << endl;
       cerr << "    -- must be a valid integer" << endl;
       cerr << "    -- must be in the interval [1, 3]" << endl;
@@ -110,7 +110,7 @@ int main(int argc, char * argv[]) {
 
   // Encoder setup
   I2CBus* theBus = new I2CBus(2);
-  shared_ptr<Encoder> enc1(new Encoder(theBus, 0x40));
+  shared_ptr<Encoder> enc1(new Encoder(theBus, 0x41));
   //shared_ptr<Encoder> enc2(new Encoder(2, enc_addr[0]));
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
@@ -152,8 +152,8 @@ int main(int argc, char * argv[]) {
 
         double angle = enc1->getAngle();
         angleReadings << timeSinceStart << ", " << angle << "\n";
-        setpoint = sin(timeSinceStart * 2 * M_PI * 3) * 60;
-        //pid1->updatePWM(setpoint, true);
+        pid1->setAngle(sin(timeSinceStart * 2 * M_PI * 3) * 60);
+        pid1->updatePWM(true);
     }
 
     if (duration >= 1.5 * DT * std::pow(10,6)) {

@@ -1,6 +1,7 @@
 *.o
 Driver
 MotorControl
+BBBMain
 main
 fpga/
 notes.txt
@@ -9,3 +10,5 @@ snake_ctl/
 __MACOSX/
 testEncoder
 testPID
+.Trash-1000/
+angleReadings.csv

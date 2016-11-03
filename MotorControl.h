@@ -14,13 +14,12 @@ using namespace std;
 
 class MotorControl {
   public:
-    int setpoint;
     vector<shared_ptr<Encoder>> encoder_list;
     vector<shared_ptr<PID>> pidctrl_list;
 
-    MotorControl(vector<shared_ptr<Encoder>> enc_list, 
-                 vector<shared_ptr<PID>> pid_list);
+    MotorControl(float a_dt);
     ~MotorControl();
+
     void start();
     void stop();
     virtual void callback();
@@ -29,6 +28,10 @@ class MotorControl {
   protected:
     bool shouldStop;
     std::thread worker_thread;
+
+  private:
+    int setpoint;
+    chrono::microseconds dt;
 };
 
 #include "MotorControl.cpp"

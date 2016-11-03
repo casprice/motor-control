@@ -28,7 +28,6 @@ using namespace std;
 #define RESOLUTION 16384.0   // 14 bits
 
 // Unit constants
-#define DT 0.001
 #define RAW_TO_DEG 1
 #define RAW_TO_RAD 2
 #define DEG_TO_RAD 3
@@ -41,6 +40,7 @@ class Encoder : public BusDevice {
     double prevAngle = 0;
     double currAngle = 0;
     double resolution;
+    int dt;
 
   public:
     /**
@@ -54,10 +54,12 @@ class Encoder : public BusDevice {
      *             a_resolution - the 14-bit resolution
      */
     Encoder(I2CBus* a_bus,
+            int a_dt,
             unsigned int a_address=DEFAULT_ADDRESS, 
             double a_resolution=RESOLUTION) 
     : BusDevice(a_bus, a_address) {
       resolution = a_resolution;
+      dt = a_dt;
       setZeroPosition();
     }
 

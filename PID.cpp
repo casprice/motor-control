@@ -24,7 +24,7 @@
  *             a_Ki - PID integral argument
  *             a_Kd - PID derivative argument
  */
-PID::PID(int motorNum, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
+PID::PID(int motorNum, float dt, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
   // Initialize pins
   pwmPin = new PWM(motorNum, FREQ);
   dirPin = new GPIO(direction_vals[motorNum-1]);
@@ -33,7 +33,7 @@ PID::PID(int motorNum, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc)
   encoder = enc;
   filter = RC_FILTER_INITIALIZER;
   // Initialize PID filter
-  if (rc_filter_pid(&filter, Kp, Ki, Kd, 4*DT, DT)) {
+  if (rc_filter_pid(&filter, Kp, Ki, Kd, 4*dt, dt)) {
     cerr << "ERROR: failed to run rc_filter_pid()\n";
   }
   // Initialize analog-to-digital converter
@@ -52,7 +52,7 @@ PID::PID(int motorNum, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc)
  *             invert - whether to invert the direction of the motor
  * Return value: None.
  */
-void PID::updatePWM(int goalAngle, bool invert) {
+void PID::updatePWM(bool invert) {
   // Check that goal angle does not exceed limits
   clip(goalAngle, MIN_ANGLE, MAX_ANGLE, 1);
 
@@ -68,6 +68,13 @@ void PID::updatePWM(int goalAngle, bool invert) {
 
   // Set new duty cycle using the magnitude
   setDuty(fabs(dutyCycle));
+}
+
+/**
+ *
+ */
+void PID::setAngle(double angle) {
+  goalAngle = angle;
 }
 
 /**

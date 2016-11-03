@@ -77,7 +77,7 @@ double Encoder::getAngle(void) {
  * Return value: The angle position.
  */
 double Encoder::getVelocity(void) {
-  return (currAngle - prevAngle) / DT;
+  return (currAngle - prevAngle) / dt;
 }
 
 /**

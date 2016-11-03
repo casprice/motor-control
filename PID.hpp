@@ -24,6 +24,7 @@ const int motor_adc[] = { 1, 3, 5 };
 class PID {
   private:
     double dutyCycle;
+    double goalAngle;
     shared_ptr<Encoder> encoder;
     rc_filter_t filter;
     PWM* pwmPin;
@@ -32,12 +33,14 @@ class PID {
 
   public:
     PID(int motorNum, 
+        float dt,
         double Kp=0, 
         double Ki=0, 
         double Kd=0, 
         shared_ptr<Encoder> enc=NULL);
     
-    void updatePWM(int goalAngle, bool invert);
+    void updatePWM(bool invert);
+    void setAngle(double angle);
     double getDutyCycle(void);
     int setDuty(double duty);
     double getCurrent(int ch);
