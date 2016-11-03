@@ -100,7 +100,8 @@ int main(int argc, char * argv[]) {
   while(running) {
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI/2.0) * 60.0;
+    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI * 2.0) * 75.0;
+    //setPoint = 45;
 
     mc->pidctrl_list[0]->setAngle(setPoint);
     this_thread::sleep_for(chrono::milliseconds(ms_dt));
@@ -109,4 +110,5 @@ int main(int argc, char * argv[]) {
   mc->stop();
 
   delete theBus;
+  delete mc;
 }

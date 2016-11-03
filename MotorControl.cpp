@@ -4,7 +4,6 @@
  */
 
 #define FREQ 20000 // 20 kHz
-#define STEP 1
 
 MotorControl::MotorControl(float s_dt) {
 
@@ -46,9 +45,9 @@ void MotorControl::stop() {
 
 void MotorControl::callback() {
   for (int i = 0; i < pidctrl_list.size(); i++) {
-      if (encoder_list[i]->calcRotation() == -1) {
-        this->stop();
-      }
+    if (encoder_list[i]->calcRotation() == -1) {
+      this->stop();
+    }
     pidctrl_list[i]->updatePWM(true);
   }
 }

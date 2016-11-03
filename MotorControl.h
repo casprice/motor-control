@@ -10,8 +10,6 @@
 #include "PID.hpp"
 using namespace std;
 
-#define NUM_MOTORS 3
-
 class MotorControl {
   public:
     vector<shared_ptr<Encoder>> encoder_list;

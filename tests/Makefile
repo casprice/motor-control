@@ -2,7 +2,7 @@
 # To use, at the prompt, type:
 #       make testEnocder        
 # or				# These will make executable driver
-# 	make testPID
+# 	make testPWM
 # or
 #       make clean              # This will safely remove old stuff
 CC = g++
@@ -11,15 +11,15 @@ LIBS = -lncurses
 
 ENCODER = testEncoder
 
-PID = testPID
+PWM = testPWM
 
-all: testEncoder testPID
+all: testEncoder testPWM
 
-testPID: $(PID).o
-	$(CC) -o $(PID) $(CFLAGS) $(PID).o /usr/lib/librobotcontrol.so
+testPWM: $(PWM).o
+	$(CC) -o $(PWM) $(CFLAGS) $(PWM).o /usr/lib/librobotcontrol.so
 
-testPID.o: $(PID).cpp ../PID.cpp ../Driver.hpp ../library/gpio.cpp ../Encoder.hpp ../library/pwm.cpp
-	$(CC) $(CFLAGS) -c $(PID).cpp
+testPWM.o: $(PWM).cpp ../PID.cpp ../Driver.hpp ../library/gpio.cpp ../Encoder.hpp ../library/pwm.cpp
+	$(CC) $(CFLAGS) -c $(PWM).cpp
 
 testEncoder: $(ENCODER).o
 	$(CC) -o $(ENCODER) $(CFLAGS) $(ENCODER).o 
@@ -28,4 +28,4 @@ testEncoder.o: $(ENCODER).cpp ../Encoder.cpp ../library/I2CBus.cpp
 	$(CC) $(CFLAGS) -c $(ENCODER).cpp
 
 clean:
-	rm -f $(ENCODER) $(PID) *.o
+	rm -f $(ENCODER) $(PWM) *.o
