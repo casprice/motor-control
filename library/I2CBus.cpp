@@ -125,6 +125,4 @@ I2CBus::~I2CBus(void) {
 	if (file != -1) {
     close(file);
   }
-
-  delete theTracker;
 }

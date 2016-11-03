@@ -1,7 +1,7 @@
 /**
  * File: Encoder.cpp
  * Description: Control class for the AS5048B magnetic encoder under an I2C bus.
- *              Reads the angle positions from the appropriate registers and 
+ *              Reads the angle positions from the appropriate registers and
  *              converts the readings to degrees or radians.
  */
 
@@ -27,16 +27,27 @@ void Encoder::setZeroPosition(void) {
  * Return value: None.
  */
 int Encoder::calcRotation(void) {
-  unsigned char * result; 
+  unsigned char * result;
   if ((result = BusDevice::readRegisters(ANGLMSB_REG)) == NULL) {
     cerr << "\nLost connection to the encoder. Aborting." << endl;
     return -1;
-  } 
+  }
+
   // Update previous angle
   prevAngle = currAngle;
 
-  // Convert new angle to degrees within the bounds of -180 to 180 degrees
-  currAngle = convertNum(toDecimal(result), RAW_TO_DEG) - RANGE_VAL - zeroPosition;
+  // Convert new reading to decimal and degrees, mod by 360
+  currAngle = fmod((convertNum(toDecimal(result), RAW_TO_DEG)) - zeroPosition, 360);
+
+  // Account for overflow
+  if (currAngle < 0) {
+    currAngle += 360;
+  }
+
+  // Set new angle within the bounds of -180 to 180 degrees
+  currAngle -= 180;
+
+  delete[] result;
 
   return 0;
 }
@@ -73,8 +84,8 @@ double Encoder::getVelocity(void) {
 
 /**
  * Routine names: Encoder::toDecimal(unsigned char * buf)
- * Description: Combines two 8-bit registers into a 16-bit short according to 
- *              the bits used in each register. 
+ * Description: Combines two 8-bit registers into a 16-bit short according to
+ *              the bits used in each register.
  * Parameters: buf - an unsigned char * buffer containing the individual bytes.
  * Return value: 16-bit short from the two 8-bit registers.
  */
