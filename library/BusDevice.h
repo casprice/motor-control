@@ -3,11 +3,11 @@
 
 class BusDevice {
 protected:
-  unsigned int bus;   
-  unsigned int device;
-  int file;           
+  I2CBus* bus;
+  unsigned int address;
 public:
-  BusDevice(unsigned int bus, unsigned int device);
+  BusDevice(I2CBus* a_bus, unsigned int device);
+  unsigned char * readRegisters(unsigned int fromAddress);
   ~BusDevice();
 };
 

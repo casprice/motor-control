@@ -6,10 +6,13 @@
  * Parameters: bus - the bus number
  *             device - the device number
  */
-BusDevice::BusDevice(unsigned int bus, unsigned int device) {
-  this->bus = bus;
-  this->device = device;
-  this->file=-1;
+BusDevice::BusDevice(I2CBus* a_bus, unsigned int a_address) {
+  this->bus = a_bus;
+  this->address = a_address;
+}
+
+unsigned char * BusDevice::readRegisters(unsigned int fromAddress) {
+  return this->bus->readRegisters(fromAddress);
 }
 
 /**

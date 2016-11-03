@@ -21,8 +21,9 @@ int main(void) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  Encoder* encoder1 = new Encoder(2, 0x40);
-  Encoder* encoder2 = new Encoder(2, 0x41);
+  I2CBus* theBus = new I2CBus(2);
+  Encoder* encoder1 = new Encoder(theBus, 0x40);
+  Encoder* encoder2 = new Encoder(theBus, 0x41);
 
   // Output calculated angle
   while(running) {

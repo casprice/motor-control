@@ -4,39 +4,8 @@
  *              Reads the angle positions from the appropriate registers and 
  *              converts the readings to degrees or radians.
  */
-#include <fcntl.h>
-#include <iostream>
-#include <linux/i2c-dev.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-using namespace std;
 
 #include "Encoder.hpp"
-
-#define RAW_TO_DEG 1
-#define RAW_TO_RAD 2
-#define DEG_TO_RAD 3
-#define RAD_TO_DEG 4
-#define RANGE_VAL 180
-
-/**
- * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address)
- * Description: Default constructor for Encoder. Sets up an instance of the I2C bus, 
- *              if one does not exist and initializes bus number, device address,
- *              and resolution. Sets the initial position of the motor as the zero
- *              position.
- * Parameters: a_bus - the bus number of the device
- *             a_address - the address ID
- *             a_resolution - the 14-bit resolution
- */
-Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution) {
-  busTracker = I2CBus::getInstance(a_bus, a_address);
-  resolution = a_resolution;
-  setZeroPosition();
-}
 
 /**
  * Routine name: Encoder::setZeroPosition(void)
@@ -59,7 +28,7 @@ void Encoder::setZeroPosition(void) {
  */
 int Encoder::calcRotation(void) {
   unsigned char * result; 
-  if ((result = busTracker->readRegisters(2, ANGLMSB_REG)) == NULL) {
+  if ((result = BusDevice::readRegisters(ANGLMSB_REG)) == NULL) {
     cerr << "\nLost connection to the encoder. Aborting." << endl;
     return -1;
   } 
