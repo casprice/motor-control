@@ -1,9 +1,10 @@
 /**
- *
- * 
+ * File: Driver.cpp
  */
 #include <rc/gpio.h>
 #include <rc/pwm.h>
+#include <signal.h>
+#include <rc/time.h>
 
 #include "Driver.hpp"
 #include "Encoder.hpp"
@@ -29,9 +30,9 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 /**
  * Ensure number doesn't exceed min or max angles
  */
-double clip(double number) {
-    if (number < MIN_ANGLE) number = MIN_ANGLE;
-    if (number > MAX_ANGLE) number = MAX_ANGLE;
+double clip(double number, int min, int max) {
+    if (number < min) number = min;
+    if (number > max) number = max;
     return number;
 }
 
@@ -39,6 +40,10 @@ double clip(double number) {
  * Main driver of the motor control for the snake.
  */
 int main() {
+    // Register keyboard interrupt
+    signal(SIGINT, __signal_handler);
+    running = 1;
+
     // Curses initialization
     initscr(); // start curses
     cbreak();  // react to keys instantly w/o Enter
@@ -55,33 +60,43 @@ int main() {
     rc_pwm_init(PWM_SUBSYS, FREQ);
     system("echo out > /sys/class/gpio/gpio" + PWM_PIN + "/direction");
     system("echo 1 > /sys/class/gpio/gpio" + PWM_PIN + "/value");
-    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, 1);
+    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, HIGH);
     rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_A, 0);
     rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_B, 0);
 
     // Create new PID and Encoder controllers
-    PID pidCtrl;
-    Encoder i2cDevice;
+    PID pidCtrl = new PID(0.8, 0.0003, 0.008);
+    Encoder i2cDevice = new Encoder();
 
     // main loop
-    while (1) {
+    while (running) {
         int ch = getch();
         switch (ch) {
             case KEY_LEFT:
                 value -= step;
             case KEY_RIGHT:
                 value += step;
-            case ' ':
+            case ord(' '):
                 if(step == COARSE_STEP) step = FINE_STEP;
                 else step = COARSE_STEP;
         }
 
-        value = clip(value);
+        value = clip(value, MIN_ANGLE, MAX_ANGLE);
         refresh(); // clear the terminal window
-        mvaddstr(1, 1, "Angle: %0.3f");
+        mvaddstr(1, 1, "Angle: %0.3f", value);
+
+        double angle = i2cDevice.getAngle();
+        mvaddstr(1, 1, "Position: %0.3f", i2cDevice.toDegree(angle)-180);
+
+        pidCtrl.update(i2cDevice.toDegree(angle)-180, value, false);
+
+        counter++;
+        if ((counter % 1000) == 0) pidCtrl.clearKi();
+
+        rc_usleep(1000);
     }
 
-    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, 0);
+    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, LOW);
 
     // Cleanup
     rc_gpio_cleanup(DIR_CHIP, DIR_PIN);

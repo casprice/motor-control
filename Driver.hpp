@@ -15,5 +15,12 @@ using namespace std;
 #define PWM_SUBSYS 1
 #define PWM_CH_A 'A'
 #define PWM_CH_B 'B'
+#define HIGH 1
+#define LOW 0
+
+class Driver {
+    public:
+        double clip(double number, int min, int max);
+}
 
 #endif

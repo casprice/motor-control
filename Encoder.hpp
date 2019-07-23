@@ -1,7 +1,9 @@
+/**
+ * File: Encoder.hpp
+ */
+
 #ifndef ENCODER_HPP
 #define ENCODER_HPP
-
-using namespace std;
 
 class Encoder {
     private:
@@ -12,9 +14,9 @@ class Encoder {
 
     public:
         Encoder();
+        Encoder(int address, int busNum);
         ~Encoder();
 
-        void init();
         void zeroAngle();
         double getAngle();
         void zeroMagnitude();
