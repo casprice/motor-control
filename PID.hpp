@@ -14,13 +14,13 @@ class PID {
         double prevError;
 
     public:
-        PID();
+        PID(void);
         PID(double Kp, double Ki, double Kd);
-        ~PID();
+        ~PID(void);
 
         void update(double current, int goal, bool invertDir);
         void clearKi();
-}
+};
 
 #include "PID.cpp"
 

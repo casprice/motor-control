@@ -5,6 +5,12 @@
 #include <rc/pwm.h>
 #include <signal.h>
 #include <rc/time.h>
+#include <string>
+#include <sstream>
+#include <cstdio>
+#include <cstdlib>
+#include <csignal>
+#include <curses.h>
 
 #include "Driver.hpp"
 #include "Encoder.hpp"
@@ -58,15 +64,19 @@ int main() {
     rc_gpio_init(DIR_CHIP, DIR_PIN, GPIOHANDLE_REQUEST_OUTPUT);
     rc_gpio_init(ENABLE_CHIP, ENABLE_PIN, GPIOHANDLE_REQUEST_OUTPUT);
     rc_pwm_init(PWM_SUBSYS, FREQ);
-    system("echo out > /sys/class/gpio/gpio" + PWM_PIN + "/direction");
-    system("echo 1 > /sys/class/gpio/gpio" + PWM_PIN + "/value");
+    system("echo out > /sys/class/gpio/gpio50/direction");
+    system("echo 1 > /sys/class/gpio/gpio50/value");
     rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, HIGH);
+    rc_gpio_set_value(DIR_CHIP, DIR_PIN, HIGH);
     rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_A, 0);
     rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_B, 0);
 
     // Create new PID and Encoder controllers
-    PID pidCtrl = new PID(0.8, 0.0003, 0.008);
-    Encoder i2cDevice = new Encoder();
+    PID pidCtrl(0.8, 0.0003, 0.008);
+    Encoder i2cDevice;
+
+    //mvaddstr(0, 1, "Angle: ");
+    //mvaddstr(1, 1, "Position: ");
 
     // main loop
     while (running) {
@@ -74,21 +84,38 @@ int main() {
         switch (ch) {
             case KEY_LEFT:
                 value -= step;
+                break;
             case KEY_RIGHT:
                 value += step;
-            case ord(' '):
+                break;
+            case ' ':
                 if(step == COARSE_STEP) step = FINE_STEP;
                 else step = COARSE_STEP;
+                break;
+            case 'q':
+                running = 0;
+            default:
+                continue;
         }
 
         value = clip(value, MIN_ANGLE, MAX_ANGLE);
         refresh(); // clear the terminal window
-        mvaddstr(1, 1, "Angle: %0.3f", value);
+        //clear();
 
+        stringstream ss1;
+        ss1 << "Angle: " << value;
+        const char * str1 = ss1.str().c_str();
+        mvaddstr(0, 1, str1);
+ 
         double angle = i2cDevice.getAngle();
-        mvaddstr(1, 1, "Position: %0.3f", i2cDevice.toDegree(angle)-180);
+        angle = i2cDevice.toDegree(angle)-180;
+        
+        stringstream ss2;
+        ss2 << "Position: " << angle;
+        const char * str2 = ss2.str().c_str();
+        mvaddstr(1, 1, str2);
 
-        pidCtrl.update(i2cDevice.toDegree(angle)-180, value, false);
+        pidCtrl.update(angle, value, false);
 
         counter++;
         if ((counter % 1000) == 0) pidCtrl.clearKi();

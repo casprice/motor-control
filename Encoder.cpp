@@ -16,56 +16,53 @@
 
 int address;
 int busNum;
-double * angleZero;
-double * magnitudeZero;
+uint8_t angleZero;
+uint8_t magnitudeZero;
 
 // Default ctor
 Encoder::Encoder() {
     address = 0x40;
     busNum = 2;
-    *angleZero = 0;
-    *magnitudeZero = 0;
+    angleZero = 0;
+    magnitudeZero = 0;
 }
 
 // Copy ctor
-Encoder::Encoder(int address, int busNum) {
-    this.address = address;
-    this.busNum = busNum;
-    *angleZero = 0;
-    *magnitudeZero = 0;
+Encoder::Encoder(int a_address, int a_busNum) {
+    address = a_address;
+    busNum = a_busNum;
+    angleZero = 0;
+    magnitudeZero = 0;
 }
 
-Encoder::~Encoder() {
-    free(angleZero);
-    free(magnitudeZero);
-}
+Encoder::~Encoder() {}
 
 void Encoder::zeroAngle() {
     rc_i2c_init(busNum, address);
-    rc_i2c_read_bytes(busNum, ANGLMSB_REG, 8, angleZero);
+    rc_i2c_read_bytes(busNum, ANGLMSB_REG, 8, &angleZero);
     rc_i2c_close(busNum);
 }
 
 double Encoder::getAngle() {
-    double val;
+    uint16_t val;
     rc_i2c_init(busNum, address);
-    rc_i2c_read_word(busNum, ANGLMSB_REG, &val);
+    /* rc_i2c_read_word(busNum, ANGLMSB_REG, &val);*/
     rc_i2c_close(busNum);
-    return val;
+    return double(val);
 }
 
 void Encoder::zeroMagnitude() {
     rc_i2c_init(busNum, address);
-    rc_i2c_read_bytes(busNum, MAGNMSB_REG, 8, angleZero);
+    rc_i2c_read_bytes(busNum, MAGNMSB_REG, 8, &angleZero);
     rc_i2c_close(busNum);
 }
 
 double Encoder::getMagnitude() {
-    double val;
+    uint16_t val;
     rc_i2c_init(busNum, address);
     rc_i2c_read_word(busNum, MAGNMSB_REG, &val);
     rc_i2c_close(busNum);
-    return val;
+    return double(val);
 }
 
 double Encoder::toDegree(double num) {

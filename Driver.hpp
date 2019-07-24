@@ -1,13 +1,7 @@
 #ifndef DRIVER_H
 #define DRIVER_H
 
-#include <cstdio>
-#include <cstdlib>
-#include <csignal>
-#include <curses.h>
-using namespace std;
-
-#define DIR_CHIP 1
+#define DIR_CHIP 0
 #define DIR_PIN 48    // P9_15
 #define ENABLE_CHIP 0
 #define ENABLE_PIN 60 // P9_12
@@ -18,9 +12,6 @@ using namespace std;
 #define HIGH 1
 #define LOW 0
 
-class Driver {
-    public:
-        double clip(double number, int min, int max);
-}
+double clip(double number, int min, int max);
 
 #endif

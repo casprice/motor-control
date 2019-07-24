@@ -9,8 +9,8 @@ class Encoder {
     private:
         int address;
         int busNum;
-        double angleZero;
-        double magnitudeZero;
+        uint8_t angleZero;
+        uint8_t magnitudeZero;
 
     public:
         Encoder();
@@ -22,8 +22,8 @@ class Encoder {
         void zeroMagnitude();
         double getMagnitude();
         double toDegree(double num);
-}
+};
 
-#include "PID.cpp"
+#include "Encoder.cpp"
 
 #endif
