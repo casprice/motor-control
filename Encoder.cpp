@@ -1,12 +1,19 @@
 /**
  * File: Encoder.cpp
  */
-
-#include <rc/i2c.h>
+#include <stdlib.h>
+#include <unistd.h>				//Needed for I2C port
+#include <fcntl.h>				//Needed for I2C port
+#include <sys/ioctl.h>			//Needed for I2C port
+#include <linux/i2c-dev.h>		//Needed for I2C port
 
 #include "Encoder.hpp"
 #include "Driver.hpp"
+#include "library/gpio.h"
+#include "library/I2CDevice.h"
+#include "library/pwm.h"
 
+#define NUM_BYTES 4 // number of bytes to read
 #define ANGLMSB_REG 0xFE // angle msb
 #define ANGLLSB_REG 0xFF // angle lsb
 #define MAGNMSB_REG 0xFC // magnitude msb
@@ -16,8 +23,11 @@
 
 int address;
 int busNum;
-uint8_t angleZero;
-uint8_t magnitudeZero;
+double angleZero;
+double magnitudeZero;
+int file_i2c;
+int length;
+unsigned char buffer[60] = {0};
 
 // Default ctor
 Encoder::Encoder() {
@@ -36,34 +46,39 @@ Encoder::Encoder(int a_address, int a_busNum) {
 }
 
 Encoder::~Encoder() {}
-
+/* 
 void Encoder::zeroAngle() {
-    rc_i2c_init(busNum, address);
-    rc_i2c_read_bytes(busNum, ANGLMSB_REG, 8, &angleZero);
-    rc_i2c_close(busNum);
-}
+    exploringBB::I2CDevice i2c(busNum, address);
+    i2c.open();
+    angleZero = *(double *)(i2c.readRegisters(8, ANGLMSB_REG));
+    i2c.close();
+}*/
 
 double Encoder::getAngle() {
-    uint16_t val;
-    rc_i2c_init(busNum, address);
-    /* rc_i2c_read_word(busNum, ANGLMSB_REG, &val);*/
-    rc_i2c_close(busNum);
-    return double(val);
+    double val = 0;
+    /*
+    exploringBB::I2CDevice i2c(busNum, address);
+    i2c.open();
+    val = *(double *)(i2c.readRegisters(4, ANGLMSB_REG));
+    i2c.close();*/
+    return val;
 }
-
+/* 
 void Encoder::zeroMagnitude() {
-    rc_i2c_init(busNum, address);
-    rc_i2c_read_bytes(busNum, MAGNMSB_REG, 8, &angleZero);
-    rc_i2c_close(busNum);
+    exploringBB::I2CDevice i2c(busNum, address);
+    i2c.open();
+    magnitudeZero = *(double *)(i2c.readRegisters(8, MAGNMSB_REG));
+    i2c.close();
 }
 
 double Encoder::getMagnitude() {
-    uint16_t val;
-    rc_i2c_init(busNum, address);
-    rc_i2c_read_word(busNum, MAGNMSB_REG, &val);
-    rc_i2c_close(busNum);
-    return double(val);
-}
+    double val = 0;
+    exploringBB::I2CDevice i2c(busNum, address);
+    i2c.open();
+    val = *(double *)(i2c.readRegisters(2, MAGNMSB_REG));
+    i2c.close();
+    return val;
+}*/
 
 double Encoder::toDegree(double num) {
     return (num / RESOLUTION) * NUM_DEG;

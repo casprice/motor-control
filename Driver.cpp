@@ -1,8 +1,6 @@
 /**
  * File: Driver.cpp
  */
-#include <rc/gpio.h>
-#include <rc/pwm.h>
 #include <signal.h>
 #include <rc/time.h>
 #include <string>
@@ -15,11 +13,13 @@
 #include "Driver.hpp"
 #include "Encoder.hpp"
 #include "PID.hpp"
+#include "library/gpio.h"
+#include "library/pwm.h"
+#include "library/util.h"
 using namespace std;
 
 #define FREQ 20000 // 20 kHz
-#define COARSE_STEP 10
-#define FINE_STEP 1
+#define STEP 10
 #define MIN_ANGLE -175
 #define MAX_ANGLE 175
 
@@ -58,39 +58,41 @@ int main() {
 
     int value = 0;   // angle we want motor to spin to
     int counter = 0; // counter for Ki
-    int step = COARSE_STEP;   // how much to increase value
 
     // GPIO/PWM setup
-    rc_gpio_init(DIR_CHIP, DIR_PIN, GPIOHANDLE_REQUEST_OUTPUT);
-    rc_gpio_init(ENABLE_CHIP, ENABLE_PIN, GPIOHANDLE_REQUEST_OUTPUT);
-    rc_pwm_init(PWM_SUBSYS, FREQ);
-    system("echo out > /sys/class/gpio/gpio50/direction");
-    system("echo 1 > /sys/class/gpio/gpio50/value");
-    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, HIGH);
-    rc_gpio_set_value(DIR_CHIP, DIR_PIN, HIGH);
-    rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_A, 0);
-    rc_pwm_set_duty(PWM_SUBSYS, PWM_CH_B, 0);
+    PWM pwm("P9_14");
+    GPIO dir(DIR_PIN);
+    GPIO enable(ENABLE_PIN);
+    GPIO pwm_pin(PWM_PIN);
+    //system("echo out > /sys/class/gpio/gpio50/direction");
+    //system("echo 1 > /sys/class/gpio/gpio50/value");
+    dir.exportGPIO();
+    dir.setDirection(GPIO::OUTPUT);
+    dir.setValue(GPIO::HIGH);
+    enable.exportGPIO();
+    enable.setDirection(GPIO::OUTPUT);
+    enable.setValue(GPIO::HIGH);
+    pwm_pin.exportGPIO();
+    pwm_pin.setDirection(GPIO::OUTPUT);
+    pwm_pin.setValue(GPIO::HIGH);
+    pwm.setFrequency(20000);
 
     // Create new PID and Encoder controllers
     PID pidCtrl(0.8, 0.0003, 0.008);
     Encoder i2cDevice;
-
-    //mvaddstr(0, 1, "Angle: ");
-    //mvaddstr(1, 1, "Position: ");
+    
+    mvaddstr(0, 1, "Angle: 0");
+    mvaddstr(1, 1, "Position: -180");
 
     // main loop
     while (running) {
         int ch = getch();
         switch (ch) {
             case KEY_LEFT:
-                value -= step;
+                value -= STEP;
                 break;
             case KEY_RIGHT:
-                value += step;
-                break;
-            case ' ':
-                if(step == COARSE_STEP) step = FINE_STEP;
-                else step = COARSE_STEP;
+                value += STEP;
                 break;
             case 'q':
                 running = 0;
@@ -115,20 +117,18 @@ int main() {
         const char * str2 = ss2.str().c_str();
         mvaddstr(1, 1, str2);
 
-        pidCtrl.update(angle, value, false);
+        pidCtrl.update(dir, pwm, angle, value, false);
 
         counter++;
         if ((counter % 1000) == 0) pidCtrl.clearKi();
 
-        rc_usleep(1000);
+        //rc_usleep(1000);
     }
 
-    rc_gpio_set_value(ENABLE_CHIP, ENABLE_PIN, LOW);
+    enable.setValue(GPIO::LOW);
+    dir.setValue(GPIO::LOW);
+    pwm_pin.setValue(GPIO::LOW);
 
-    // Cleanup
-    rc_gpio_cleanup(DIR_CHIP, DIR_PIN);
-    rc_gpio_cleanup(ENABLE_CHIP, ENABLE_PIN);
-    rc_pwm_cleanup(PWM_SUBSYS);
     endwin();  // restore terminal from curses
 
     return 0;

@@ -9,8 +9,8 @@ class Encoder {
     private:
         int address;
         int busNum;
-        uint8_t angleZero;
-        uint8_t magnitudeZero;
+        double angleZero;
+        double magnitudeZero;
 
     public:
         Encoder();
