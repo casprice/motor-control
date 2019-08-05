@@ -35,8 +35,6 @@ using std::ofstream;
 
 #define GPIO_PATH "/sys/class/gpio/"
 
-namespace exploringBB {
-
 typedef int (*CallbackType)(int);
 
 /**
@@ -80,8 +78,6 @@ private:
 	int togglePeriod;  //default 100ms
 	int toggleNumber;  //default -1 (infinite)
 };
-
-} /* namespace exploringBB */
 
 #include "gpio.cpp"
 

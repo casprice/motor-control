@@ -22,24 +22,20 @@
  * For more details, see http://www.derekmolloy.ie/
  */
 
-#include "pwm.h"
-#include "util.h"
-#include <cstdlib>
-
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <iostream>
 #include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <iostream>
-#include <stdlib.h>
+
+#include "pwm.h"
+#include "util.h"
 
 #define MAX_BUF 64
-
-namespace exploringBB {
 
 PWM::PWM(string pinName) {
 	this->name = pinName;
@@ -79,7 +75,7 @@ int PWM::setDutyCycle(unsigned int duty_ns){
 	return write(this->path, PWM_DUTY, duty_ns);
 }
 
-int PWM::setDutyCycle(float percentage){
+int PWM::setDutyCycle(double percentage){
 	if ((percentage>100.0f)||(percentage<0.0f)) return -1;
 	unsigned int period_ns = this->getPeriod();
 	float duty_ns = period_ns * (percentage/100.0f);
@@ -129,5 +125,3 @@ int PWM::stop(){
 }
 
 PWM::~PWM() {}
-
-} /* namespace exploringBB */

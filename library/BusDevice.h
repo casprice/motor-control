@@ -41,14 +41,14 @@ protected:
 	int file;            /**< the file handle to the device */
 public:
 	BusDevice(unsigned int bus, unsigned int device);
-	virtual int open()=0;
-	virtual unsigned char readRegister(unsigned int registerAddress)=0;
-	virtual unsigned char* readRegisters(unsigned int number, unsigned int fromAddress=0)=0;
-	virtual int write(unsigned char value)=0;
-	virtual int writeRegister(unsigned int registerAddress, unsigned char value)=0;
-	virtual void debugDumpRegisters(unsigned int number = 0xff)=0;
-	virtual void close()=0;
-	virtual ~BusDevice();
+	int open();
+	unsigned char readRegister(unsigned int registerAddress);
+	unsigned char* readRegisters(unsigned int number, unsigned int fromAddress);
+	int write(unsigned char value);
+	int writeRegister(unsigned int registerAddress, unsigned char value);
+	void debugDumpRegisters(unsigned int number = 0xff);
+	void close();
+	~BusDevice();
 };
 
 } /* namespace exploringBB */

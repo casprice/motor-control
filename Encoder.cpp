@@ -1,85 +1,132 @@
 /**
  * File: Encoder.cpp
+ * 
+ * Description: TODO
  */
 #include <stdlib.h>
-#include <unistd.h>				//Needed for I2C port
-#include <fcntl.h>				//Needed for I2C port
-#include <sys/ioctl.h>			//Needed for I2C port
-#include <linux/i2c-dev.h>		//Needed for I2C port
+#include <string.h>
+#include <unistd.h>				 
+#include <fcntl.h>				 
+#include <sys/ioctl.h>		 
+#include <linux/i2c-dev.h> 
 
 #include "Encoder.hpp"
-#include "Driver.hpp"
-#include "library/gpio.h"
-#include "library/I2CDevice.h"
-#include "library/pwm.h"
 
-#define NUM_BYTES 4 // number of bytes to read
-#define ANGLMSB_REG 0xFE // angle msb
-#define ANGLLSB_REG 0xFF // angle lsb
-#define MAGNMSB_REG 0xFC // magnitude msb
-#define MAGNLSB_REG 0xFD // magnitude lsb
-#define RESOLUTION 16384.0
-#define NUM_DEG 360
-
-int address;
-int busNum;
-double angleZero;
-double magnitudeZero;
-int file_i2c;
-int length;
-unsigned char buffer[60] = {0};
-
-// Default ctor
-Encoder::Encoder() {
-    address = 0x40;
-    busNum = 2;
-    angleZero = 0;
-    magnitudeZero = 0;
+/**
+ * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address) (public)
+ * 
+ * Description: Default constructor for Encoder. Initializes the Encoder values to 
+ * zero. 
+ */
+Encoder::Encoder(unsigned int a_bus, unsigned int a_address) 
+				: I2CDevice(a_bus, a_address) {
+	bus = a_bus;
+	address = a_address;
+	angle = 0;
+	memset(buffer, 0, sizeof(unsigned char));
+	writeRegister(buffer, ANGLLSB_REG, ANGLMSB_REG);
+	setZeroPosition();
 }
 
-// Copy ctor
-Encoder::Encoder(int a_address, int a_busNum) {
-    address = a_address;
-    busNum = a_busNum;
-    angleZero = 0;
-    magnitudeZero = 0;
+/**
+ * Routine name: Encoder::setZeroPosition(void) (public)
+ * 
+ * Description: Set the zero position of the angle using one time programmable
+ *              (OTP) fuses for permanet programming of the user settings.
+ * 
+ * Parameters: None.
+ * 
+ * Return value: -1 if error occurred, 0 if successful.
+ */
+int Encoder::setZeroPosition(void) {
+	// Write 0 int OTP zero position register to clear
+	memset(buffer, 0, sizeof(unsigned char));
+	if(writeRegister(buffer, ZEROLSB_REG, ZEROMSB_REG) == -1) {
+		perror("Encoder: Could not write zero position.\n");
+		return -1;
+	}
+
+	// Read angle information
+	if(readRegister(buffer) == -1) {
+		perror("Encoder: Could not read zero position.\n");
+		return -1;
+	}
+
+	// Write previous read angle position into OTP zero position register
+	if(writeRegister(buffer, ZEROLSB_REG, ZEROMSB_REG) == -1) {
+		perror("Encoder: Could not write zero position.\n");
+		return -1;
+	}
+
+	return 0;
 }
 
-Encoder::~Encoder() {}
-/* 
-void Encoder::zeroAngle() {
-    exploringBB::I2CDevice i2c(busNum, address);
-    i2c.open();
-    angleZero = *(double *)(i2c.readRegisters(8, ANGLMSB_REG));
-    i2c.close();
-}*/
+/**
+ * Routine name:
+ * 
+ * Description: Get angle by reading angle registers, which outputs values
+ *              including zero position correction. Convert angle to degrees
+ * 							according to its resolution.
+ * 
+ * Parameters:
+ * 
+ * Return value:
+ */
+double Encoder::calcRotation(double resolution) {
+	//double rotation;
 
-double Encoder::getAngle() {
-    double val = 0;
-    /*
-    exploringBB::I2CDevice i2c(busNum, address);
-    i2c.open();
-    val = *(double *)(i2c.readRegisters(4, ANGLMSB_REG));
-    i2c.close();*/
-    return val;
-}
-/* 
-void Encoder::zeroMagnitude() {
-    exploringBB::I2CDevice i2c(busNum, address);
-    i2c.open();
-    magnitudeZero = *(double *)(i2c.readRegisters(8, MAGNMSB_REG));
-    i2c.close();
+	writeRegister(buffer, ANGLLSB_REG, ANGLMSB_REG);
+	readRegister(buffer);
+
+	angle = toDegree(resolution, (double)toDecimal(buffer));
+
+	//angle = (double)rotation - zeroPosition;
+	
+	return 1;
 }
 
-double Encoder::getMagnitude() {
-    double val = 0;
-    exploringBB::I2CDevice i2c(busNum, address);
-    i2c.open();
-    val = *(double *)(i2c.readRegisters(2, MAGNMSB_REG));
-    i2c.close();
-    return val;
-}*/
-
-double Encoder::toDegree(double num) {
-    return (num / RESOLUTION) * NUM_DEG;
+/**
+ * Routine name:
+ * 
+ * Description: Returns the current zero position.
+ * 
+ * Parameters:
+ */
+double Encoder::getAngle(void) {
+	return angle;
 }
+
+/**
+ * Routine names:
+ * 
+ * Description: Combines two 8-bit registers into a 16-bit short. 
+ * 
+ * Parameters:
+ */
+short Encoder::toDecimal(unsigned char * buf) {
+  // (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
+	// (( ( left_byte & 0xFF ) << 8 ) | ( right_byte & 0xFF )) & ~0xC000;
+  //return (buf[1] << 8) + (buf[0] & 0xFF);
+	// (buf[1] << 6) + (buf[0] & 0x3F)
+
+	// buf[0] uses 6 bits and buf[1] uses 8 bits.
+  return ((short)buf[1] << 6) | ((short)buf[0] & 0x3F);
+}
+
+/**
+ * Routine name:
+ * 
+ * Description: Convert num into degrees using given resolution.
+ * 
+ * Parameters:
+ */
+double Encoder::toDegree(double resolution, double num) {
+  return (num / resolution) * NUM_DEG;
+}
+
+/**
+ * Routine name:
+ * 
+ * Description:
+ */
+Encoder::~Encoder(void) {}

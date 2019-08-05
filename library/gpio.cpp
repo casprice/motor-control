@@ -39,7 +39,6 @@
 #include <pthread.h>
 using namespace std;
 
-namespace exploringBB {
 /**
  * The constructor will set up the states and export the pin.
  * @param number The GPIO number to be exported
@@ -149,7 +148,4 @@ GPIO::DIRECTION GPIO::getDirection(){
 	else return OUTPUT;
 }
 
-GPIO::~GPIO() {
-}
-
-} /* namespace exploringBB */
+GPIO::~GPIO() {}

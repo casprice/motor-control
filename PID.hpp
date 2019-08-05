@@ -8,8 +8,6 @@
 #include "library/gpio.h"
 #include "library/pwm.h"
 
-using namespace exploringBB;
-
 class PID {
     private:
         double Kp;
@@ -17,12 +15,14 @@ class PID {
         double Kd;
         double totalError;
         double prevError;
+        double dutyCycle;
 
     public:
-        PID(double Kp, double Ki, double Kd);
+        PID(double Kp=0, double Ki=0, double Kd=0);
         ~PID(void);
         
-        void update(GPIO& dir, PWM& pwm, double current, int goal, bool invertDir);
+        void updatePWM(PWM& pwm, double current, int goal);
+        void updatePin(GPIO& pin, bool invert);
         void clearKi();
 };
 
