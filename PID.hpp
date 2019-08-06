@@ -8,6 +8,7 @@
 #include <memory>
 using namespace std;
 
+#include "Encoder.hpp"
 #include "library/gpio.h"
 #include "library/pwm.h"
 
@@ -19,11 +20,12 @@ class PID {
         double totalError;
         double prevError;
         double dutyCycle;
+        shared_ptr<Encoder> encoder;
 
     public:
-        PID(double Kp=0, double Ki=0, double Kd=0);
+        PID(double Kp=0, double Ki=0, double Kd=0, shared_ptr<Encoder> enc);
         
-        void updatePWM(PWM& pwm, shared_ptr<Encoder> encoder, int goal);
+        void updatePWM(PWM& pwm, int goal);
         void updatePin(GPIO& pin, bool invert);
         void clearKi(void);
 

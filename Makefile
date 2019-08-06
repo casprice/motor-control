@@ -16,8 +16,8 @@ DEPENDENCIES = \
 		library/gpio.cpp \
 		library/pwm.h \
 		library/pwm.cpp \
-		library/I2CDevice.h \
-		library/I2CDevice.cpp \
+		library/I2CBus.h \
+		library/I2CBus.cpp \
 		library/util.h \
 		library/util.cpp
 

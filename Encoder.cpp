@@ -1,6 +1,8 @@
 /**
  * File: Encoder.cpp
- * Description: TODO
+ * Description: Control class for the AS5048B magnetic encoder under an I2C bus.
+ *              Reads the angle positions from the appropriate registers and 
+ *              converts the readings to degrees or radians.
  */
 #include <fcntl.h>
 #include <iostream>
@@ -16,32 +18,29 @@ using namespace std;
 
 #define RAW_TO_DEG 1
 #define RAW_TO_RAD 2
-#define DEG_TO_RAW 3
-#define DEG_TO_RAD 4
-#define RAD_TO_DEG 5
+#define DEG_TO_RAD 3
+#define RAD_TO_DEG 4
 #define MIN_VALUE -180
 #define MAX_VALUE 180
 
 /**
- * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address) (public)
- * Description: Default constructor for Encoder. Initializes the Encoder values to 
- *              zero. 
+ * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address)
+ * Description: Default constructor for Encoder. Sets up an instance of the I2C bus, 
+ *              if one does not exist and initializes bus number, device address,
+ *              and resolution. Sets the initial position of the motor as the zero
+ *              position.
  * Parameters: a_bus - the bus number of the device
  *             a_address - the address ID
  *             a_resolution - the 14-bit resolution
  */
-Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution) 
-        : I2CDevice(a_bus, a_address) {
-  bus = a_bus;
-  address = a_address;
+Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution) {
+  busTracker = I2CBus::getInstance(a_bus, a_address);
   resolution = a_resolution;
-  angle = 0;
-  zeroPosition = 0;
   setZeroPosition();
 }
 
 /**
- * Routine name: Encoder::setZeroPosition(void) (public)
+ * Routine name: Encoder::setZeroPosition(void)
  * Description: Set the zero position of the angle.
  * Parameters: None.
  * Return value: -1 if error occurred, 0 if successful.
@@ -60,7 +59,7 @@ void Encoder::setZeroPosition(void) {
  * Return value: NOne.
  */
 void Encoder::calcRotation(void) {
-  unsigned char * result = readRegisters(2, ANGLMSB_REG);
+  unsigned char * result = busTracker->readRegisters(2, ANGLMSB_REG);
   // Convert angle to degrees within the bounds of -180 to 180 degrees
   angle = convertNum(toDecimal(result), RAW_TO_DEG) + 180 - zeroPosition;
 
@@ -124,9 +123,6 @@ double Encoder::convertNum(double num, int conversion) {
     // Convert raw number to radians
     case RAW_TO_RAD:
       return (num / resolution) * 2 * M_PI;
-
-    case DEG_TO_RAW: 
-      return (num / 360) * resolution;
 
     // Convert from degrees to radians
     case DEG_TO_RAD:

@@ -24,7 +24,7 @@ testI2C.o: $(I2C).cpp
 testEncoder: $(ENCODER).o
 	$(CC) -o $(ENCODER) $(CFLAGS) $(ENCODER).o
 
-testEncoder.o: $(ENCODER).cpp ../Encoder.cpp ../library/I2CDevice.cpp
+testEncoder.o: $(ENCODER).cpp ../Encoder.cpp ../library/I2CBus.cpp
 	$(CC) $(CFLAGS) -c $(ENCODER).cpp
 
 clean:
