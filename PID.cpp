@@ -1,6 +1,5 @@
 /**
  * File: PID.cpp
- * 
  * Description: TODO
  */
 
@@ -13,11 +12,9 @@
 #define MAX_DUTY 100
 
 /**
- * Routine name: PID::PID(double a_Kp, double a_Ki, double a_Kd) (public)
- * 
+ * Routine name: PID::PID(double a_Kp, double a_Ki, double a_Kd)
  * Description: Copy constructor for PID. Assigns the PID values and initializes 
  *              error values to 0.
- * 
  * Parameters: a_Kp - PID proportion argument
  *             a_Ki - PID integral argument
  *             a_Kd - PID derivative argument
@@ -32,18 +29,17 @@ PID::PID(double a_Kp, double a_Ki, double a_Kd) {
 }
 
 /**
- * Routine name: PID::updatePWM(PWM& pwm, double current, int goal) (public)
- * 
+ * Routine name: PID::updatePWM(PWM& pwm, double current, int goal)
  * Description: Configures the PWM pin for output by adjusting the duty cycle
  *              through PID control based on current angle and goal.
- * 
  * Parameters: pwm - reference to PWM pin
  *             current - current angle as calculated by encoder
  *             goal - angle we want to move the motor to
- * 
  * Return value: None.
  */
-void PID::updatePWM(PWM& pwm, double current, int goal) {
+void PID::updatePWM(PWM& pwm, Encoder * encoder, int goal) {
+    double current = encoder.getAngle();
+    
     // Calculate the new duty cycle value from PID control
     dutyCycle = (Kp * (goal - current)) + Ki * totalError + Kd * prevError;
 
@@ -59,14 +55,11 @@ void PID::updatePWM(PWM& pwm, double current, int goal) {
 }
 
 /**
- * Routine name: PID::updatePin(PWM& pwm, double current, int goal) (public)
- * 
+ * Routine name: PID::updatePin(PWM& pwm, double current, int goal)
  * Description: Configures a GPIO pin for output. Depending on value of invert,
  *              set value to high or low.
- * 
  * Parameters: pin - reference to GPIO pin
  *             invert - whether to invert pin
- * 
  * Return value: None.
  */
 void PID::updatePin(GPIO& pin, bool invert) {
@@ -78,12 +71,9 @@ void PID::updatePin(GPIO& pin, bool invert) {
 }
 
 /**
- * Routine name: PID::clearKi(void) (public)
- * 
+ * Routine name: PID::clearKi(void)
  * Description: Zeroes-out integral part of PID.
- * 
  * Parameters: None.
- * 
  * Return value: None.
  */
 void PID::clearKi(void) {
@@ -91,8 +81,8 @@ void PID::clearKi(void) {
 }
 
 /**
- * Routine name: PID::~PID(void) (public)
- * 
+ * Routine name: PID::~PID(void)
  * Description: Default desctructor for PID.
+ * Parameters: None.
  */
-PID :: ~PID(void) {}
+PID::~PID(void) {}

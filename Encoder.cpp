@@ -1,22 +1,31 @@
 /**
  * File: Encoder.cpp
- * 
  * Description: TODO
  */
+#include <fcntl.h>
+#include <iostream>
+#include <linux/i2c-dev.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>				 
-#include <fcntl.h>				 
-#include <sys/ioctl.h>		 
-#include <linux/i2c-dev.h> 
+#include <sys/ioctl.h>
+#include <unistd.h>
+using namespace std;
 
 #include "Encoder.hpp"
 
+#define RAW_TO_DEG 1
+#define RAW_TO_RAD 2
+#define DEG_TO_RAW 3
+#define DEG_TO_RAD 4
+#define RAD_TO_DEG 5
+#define MIN_VALUE -180
+#define MAX_VALUE 180
+
 /**
  * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address) (public)
- * 
  * Description: Default constructor for Encoder. Initializes the Encoder values to 
- * zero. 
+ *              zero. 
  */
 Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution) 
 				: I2CDevice(a_bus, a_address) {
@@ -30,85 +39,106 @@ Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution
 
 /**
  * Routine name: Encoder::setZeroPosition(void) (public)
- * 
- * Description: Set the zero position of the angle using one time programmable
- *              (OTP) fuses for permanet programming of the user settings.
- * 
+ * Description: Set the zero position of the angle.
  * Parameters: None.
- * 
  * Return value: -1 if error occurred, 0 if successful.
  */
-int Encoder::setZeroPosition(void) {
+void Encoder::setZeroPosition(void) {
 	calcRotation();
 	zeroPosition = angle;
-
-	return 0;
 }
 
 /**
- * Routine name:
- * 
+ * Routine name: Encoder::calcRotation(void)
  * Description: Get angle by reading angle registers, which outputs values
  *              including zero position correction. Convert angle to degrees
  * 							according to its resolution.
- * 
- * Parameters:
- * 
- * Return value:
+ * Parameters: None.
+ * Return value: 
  */
-double Encoder::calcRotation() {
-	unsigned char * result = readRegisters(2, ANGLMSB_REG);
-	angle = toDegree(toDecimal(result)) - zeroPosition;
+void Encoder::calcRotation(void) {
+  unsigned char * result = readRegisters(2, ANGLMSB_REG);
+	angle = convertNum(toDecimal(result), RAW_TO_DEG) + 180 - zeroPosition;
 
-	return 1;
+	/* Ensure angle is within boundaries
+	if (angle < MIN_VALUE) {
+		cerr << "Exceeded min angle! Angle at: " << angle;
+		angle = MIN_VALUE;
+	}
+
+	if (angle > MAX_VALUE) {
+		angle = MAX_VALUE;
+		cerr << "Exceeded max angle! Angle at: " << angle;
+	}*/
 }
 
 /**
- * Routine name:
- * 
- * Description: Returns the current zero position.
- * 
- * Parameters:
+ * Routine name: Encoder::getAngle(void)
+ * Description: Returns the current raw angle position.
+ * Parameters: None.
+ * Return value:
  */
 double Encoder::getAngle(void) {
 	return angle;
 }
 
+/**
+ * Routine name: Encoder::getZero(void)
+ * Description: Returns the current zero position.
+ * Parameters:
+ * Return value:
+ */
 double Encoder::getZero(void) {
 	return zeroPosition;
 }
 
 /**
- * Routine names:
- * 
- * Description: Combines two 8-bit registers into a 16-bit short. 
- * 
+ * Routine names: Encoder::toDecimal(unsigned char * buf)
+ * Description: Combines two 8-bit registers into a 16-bit short according to 
+ *              the bits used in each register. 
  * Parameters:
+ * Return value:
  */
 short Encoder::toDecimal(unsigned char * buf) {
-  // (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
-	// (( ( left_byte & 0xFF ) << 8 ) | ( right_byte & 0xFF )) & ~0xC000;
-  //return (buf[1] << 8) + (buf[0] & 0xFF);
-	// (buf[1] << 6) + (buf[0] & 0x3F)
-
 	// buf[0] uses 6 bits and buf[1] uses 8 bits.
   return ((short)buf[1] << 6) | ((short)buf[0] & 0x3F);
 }
 
 /**
- * Routine name:
- * 
- * Description: Convert num into degrees using given resolution.
- * 
- * Parameters:
+ * Routine name: Encoder::convertNum(double num, int conversion)
+ * Description: Convert num to readable unit using device's resolution.
+ * Parameters: num - the number to convert
+ *             conversion - integer indicating the type of conversion to peform
+ * Return value: The converted number. Defaults to returning parametrized num.
  */
-double Encoder::toDegree(double num) {
-  return (num / resolution) * NUM_DEG;
+double Encoder::convertNum(double num, int conversion) {
+	switch(conversion) {
+		// Convert raw number to degrees
+		case RAW_TO_DEG:
+			return (num / resolution) * 360;
+
+		// Convert raw number to radians
+		case RAW_TO_RAD:
+			return (num / resolution) * 2 * M_PI;
+
+		case DEG_TO_RAW: 
+			return (num / 360) * resolution;
+
+		// Convert from degrees to radians
+		case DEG_TO_RAD:
+			return num * M_PI / 180;
+
+		// Convert from radians to degrees
+		case RAD_TO_DEG:
+			return num / M_PI * 180;
+	}
+
+  return num;
 }
 
 /**
  * Routine name:
- * 
  * Description:
+ * Parameters: None.
  */
 Encoder::~Encoder(void) {}

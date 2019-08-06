@@ -2,16 +2,18 @@
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
-#include <fcntl.h>				  // Needed for I2C port
-#include <sys/ioctl.h>			// Needed for I2C port
-#include <linux/i2c-dev.h>  // Needed for I2C port
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
 using namespace std;
 
 /**
- * Constructor for the I2CDevice class. It requires the bus number and device number. The constructor
- * opens a file handle to the I2C device, which is destroyed when the destructor is called
- * @param bus The bus number. Usually 0 or 1 on the BBB
- * @param device The device ID on the bus.
+ * Routine name: I2CDevice::I2CDevice(unsigned int a_bus, unsigned int a_address)
+ * Description: Constructor for the I2CDevice class. It requires the bus number
+ *              and device number. Opens a file handle to the I2C device, which
+ *              is destroyed when the destructor is called
+ * Parameters: bus - The bus number. Usually bus #2
+ *             device - The device ID on the bus.
  */
 I2CDevice::I2CDevice(unsigned int a_bus, unsigned int a_address) {
 	bus = a_bus;
@@ -21,10 +23,12 @@ I2CDevice::I2CDevice(unsigned int a_bus, unsigned int a_address) {
 }
 
 /**
- * Open a connection to an I2C device
- * @return -1 on failure to open to the bus or device, 0 on success.
+ * Routine name: I2CDevice::openDevice(void)
+ * Description: Opens a connection to the device through an I2C bus.
+ * Parameters: None.
+ * Return value: -1 on failure to open to the bus or device, 0 on success.
  */
-int I2CDevice::openDevice(void){
+int I2CDevice::openDevice(void) {
   string name = BBB_I2C_2;
   // Choose correct bus
   switch(address) {
@@ -44,6 +48,8 @@ int I2CDevice::openDevice(void){
     perror("I2C: failed to open the bus\n");
     return -1;
   }
+
+  // Initiate communication with the device
   if(ioctl(file, I2C_SLAVE, address) < 0){
     perror("I2C: Failed to connect to the device\n");
     return -1;
@@ -53,30 +59,33 @@ int I2CDevice::openDevice(void){
 }
 
 /**
- * Write a single value to the I2C device. Used to set up the device to read from a
- * particular address.
- * @param value the value to write to the device
- * @return 1 on failure to write, 0 on success.
+ * Routine name: I2CDevice::writeRegister(unsigned char value)
+ * Description: Writes a value to the I2C device. Used to set up the 
+ *              device to read from a particular address.
+ * Parameters: value - the value to write to the device
+ * Return value: 1 on failure to write, 0 on success.
  */
 int I2CDevice::writeRegister(unsigned char value) {
-   unsigned char buffer[1];
-   buffer[0]=value;
-   if (write(file, buffer, 1) != 1){
-      perror("I2C: Failed to write to the device\n");
-      return 1;
-   }
-   return 0;
+  unsigned char buffer[1];
+  buffer[0] = value;
+  
+  if (write(file, buffer, 1) != 1){
+    perror("I2C: Failed to write to the device\n");
+    return 1;
+  }
+
+  return 0;
 }
 
 /**
- * Method to read a number of registers from a single device. This is much more efficient than
- * reading the registers individually. The from address is the starting address to read from, which
- * defaults to 0x00.
- * @param number the number of registers to read from the device
- * @param fromAddress the starting address to read from
- * @return a pointer of type unsigned char* that points to the first element in the block of registers
+ * Routine name: I2CDevice::readRegisters(unsigned int number, unsigned int fromAddress)
+ * Description: Reads number of registers from a device. 
+ * Parameters: number - the number of registers to read from the device
+ *             fromAddress - the starting address to read from
+ * Return value: a pointer of type unsigned char * that points to the first
+ *               element in the block of registers.
  */
-unsigned char * I2CDevice::readRegisters(unsigned int number, unsigned int fromAddress){
+unsigned char * I2CDevice::readRegisters(unsigned int number, unsigned int fromAddress) {
 	unsigned char* data = new unsigned char[number];
   writeRegister(fromAddress);
   if (read(file, data, number) != (int)number) {
@@ -87,18 +96,24 @@ unsigned char * I2CDevice::readRegisters(unsigned int number, unsigned int fromA
 }
 
 /**
- * Close the file handles and sets a temporary state to -1.
+ * Routine name: I2CDevice::closeDevice(void)
+ * Description: Close the file handles and sets a temporary state to -1.
+ * Parameters: None.
+ * Return value: None.
  */
-void I2CDevice::closeDevice(void){
+void I2CDevice::closeDevice(void) {
 	close(file);
 	file = -1;
 }
 
 /**
- * Closes the file on destruction, provided that it has not already been closed.
+ * Routine name: I2CDevice::~I2CDevice(void)
+ * Description: Closes the file on destruction, provided that it has not 
+ *              already been closed.
+ * Parameters: None.
  */
 I2CDevice::~I2CDevice(void) {
-	if(file!=-1) {
+	if (file != -1) {
     close(file);
   }
 }

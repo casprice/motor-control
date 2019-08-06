@@ -101,7 +101,7 @@ class AS5048B:
         return val
     def zero_magnitude(self):
         bus = SMBus(self.busnum)
-        self.magnitude_zero = self.bus.read_i2c_block_data(self.address, AS5048B_registers["MAGNMSB_REG"], 8)
+        self.magnitude_zero = bus.read_i2c_block_data(self.address, AS5048B_registers["MAGNMSB_REG"], 8)
         bus.close()
     def getMagnitude(self):
         #return self.bus.read_i2c_block_data(self.address, AS5048B_registers["MAGNMSB_REG"], 16) - self.magnitude_zero
@@ -157,7 +157,7 @@ def main():
         
         stdscr.addstr(1,1, "Postion: {}".format(truncate(i2c_device.toDegree(temp_list)-180, 3)))
         # pid section
-	pid_ctl.update(current=i2c_device.toDegree(temp_list) - 180, goal=value, dir_inverted=False)
+        pid_ctl.update(current=i2c_device.toDegree(temp_list) - 180, goal=value, dir_inverted=False)
 
         counter += 1
         if (counter % 1000) == 0:

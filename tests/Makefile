@@ -11,8 +11,6 @@ LIBS = -lncurses
 
 ENCODER = testEncoder
 
-SETZERO = testsetZeroPosition
-
 I2C = testI2C
 
 all: testEncoder testsetZeroPosition
@@ -28,12 +26,6 @@ testEncoder: $(ENCODER).o
 
 testEncoder.o: $(ENCODER).cpp ../Encoder.cpp ../library/I2CDevice.cpp
 	$(CC) $(CFLAGS) -c $(ENCODER).cpp
-
-testsetZeroPosition: $(SETZERO).o
-	$(CC) -o $(SETZERO) $(CFLAGS) $(SETZERO).o
-
-testsetZeroPosition.o: $(SETZERO).cpp ../Encoder.cpp ../Encoder.hpp
-	$(CC) $(CFLAGS) -c $(SETZERO).cpp
 
 clean:
 	rm -f $(ENCODER) $(SETZERO) *.o
