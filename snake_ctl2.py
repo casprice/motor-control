@@ -4,17 +4,17 @@
 #build_params = ['local_test']
 build_params = ['bbb_test']
 
-#pin_map = {
-#	"pwm": "P8_13",
-#	"enable": "P8_11",
-#	"direction": "P8_10"
-#}
-
 pin_map = {
-	"pwm": "P8_19",
-	"enable": "P8_17",
-	"direction": "P8_18"
+	"pwm": "P8_13",
+	"enable": "P8_11",
+	"direction": "P8_10"
 }
+
+#pin_map = {
+#	"pwm": "P8_19",
+#	"enable": "P8_17",
+#	"direction": "P8_18"
+#}
 
 # include
 import curses
@@ -132,10 +132,10 @@ def main():
         PWM.start(pin_map["pwm"], 0, 20000) 
 
     # pid setup (Kp, Kd, Ki)
-    pid_ctl = pid_ctl_dir_en(0.8, 0.0, 0.0)
+    pid_ctl = pid_ctl_dir_en(0.8, 0.0003, 0.008)
     i2c_device = AS5048B()
     # loop
-    step = 1
+    step = 10
     while True:
         # control
         c = stdscr.getch()
@@ -153,8 +153,9 @@ def main():
         stdscr.clear()
         stdscr.addstr(0,1,"Angle: {}".format(value))
 
-        temp_list = (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
-        
+        # temp_list = (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
+
+	temp_list = 8192
         stdscr.addstr(1,1, "Postion: {}".format(truncate(i2c_device.toDegree(temp_list)-180, 3)))
         # pid section
 	pid_ctl.update(current=i2c_device.toDegree(temp_list) - 180, goal=value, dir_inverted=False)

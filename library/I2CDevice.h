@@ -18,8 +18,8 @@ protected:
 public:
 	I2CDevice(unsigned int a_bus, unsigned int a_device);
 	int openDevice(void);
-	int writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb);
-	int readRegister(unsigned char * buffer);
+	int writeRegister(unsigned char value);
+	unsigned char* readRegisters(unsigned int number, unsigned int fromAddress);
 	void closeDevice(void);
 	~I2CDevice(void);
 };

@@ -53,34 +53,37 @@ int I2CDevice::openDevice(void){
 }
 
 /**
- * Write a single byte value to a single register. returns the number of bytes actually written, if it doesn't match then an error occurred (e.g. no response from the device)
- * @param registerAddress The register address
- * @param value The value to be written to the register
- * @return -1 on failure to write, 0 on success.
+ * Write a single value to the I2C device. Used to set up the device to read from a
+ * particular address.
+ * @param value the value to write to the device
+ * @return 1 on failure to write, 0 on success.
  */
-int I2CDevice::writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb){
-  buffer[0] = lsb;
-  //buffer[1] = msb;
-
-  if (write(file, buffer, 1) != 1) {
-    perror("I2C: Failed to write to the i2c bus.\n");
-    return -1;
-  }
-  return 0;
+int I2CDevice::writeRegister(unsigned char value) {
+   unsigned char buffer[1];
+   buffer[0]=value;
+   if (write(file, buffer, 1) != 1){
+      perror("I2C: Failed to write to the device\n");
+      return 1;
+   }
+   return 0;
 }
 
 /**
- * Read a single register value from the address on the device. returns the number of bytes actually read, if it doesn't match then an error occurred (e.g. no response from the device)
- * @param registerAddress the address to read from
- * @return the byte value at the register address.
+ * Method to read a number of registers from a single device. This is much more efficient than
+ * reading the registers individually. The from address is the starting address to read from, which
+ * defaults to 0x00.
+ * @param number the number of registers to read from the device
+ * @param fromAddress the starting address to read from
+ * @return a pointer of type unsigned char* that points to the first element in the block of registers
  */
-int I2CDevice::readRegister(unsigned char * buffer){
-  if (read(file, buffer, 2) != 2)	{
-    perror("I2C: Failed to read from the i2c bus.\n");
-    return -1;
+unsigned char * I2CDevice::readRegisters(unsigned int number, unsigned int fromAddress){
+	unsigned char* data = new unsigned char[number];
+  writeRegister(fromAddress);
+  if (read(file, data, number) != (int)number) {
+    perror("I2C: Failed to read in the full buffer.\n");
+    return NULL;
   }
-
-  return 0;
+	return data;
 }
 
 /**

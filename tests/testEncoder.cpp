@@ -2,7 +2,8 @@
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
-#include <i2c/smbus.h>
+#include <linux/i2c-dev.h>
+//#include <i2c/smbus.h>
 
 using namespace std;
 
@@ -30,11 +31,11 @@ int main(void) {
   while(running) {
     printf("\r");
 
-    encoder.calcRotation(RESOLUTION);
-    cout << "Angle: " << encoder.getAngle() << "    ";
+    encoder.calcRotation();
+    cout << "Zero: " << encoder.getZero() << " | Angle: " << encoder.getAngle() << "    ";
 
     fflush(stdout);
-    sleep(1); // sleep for 1 second
+    sleep(0.1); // sleep for 1 second
   }
   
   cout << endl;

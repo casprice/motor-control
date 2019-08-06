@@ -2,7 +2,62 @@
 #include <fcntl.h>				//Needed for I2C port
 #include <sys/ioctl.h>			//Needed for I2C port
 #include <linux/i2c-dev.h>		//Needed for I2C port
+#include <i2c/smbus.h>
 
+#define I2C_SLAVE	0x0703	/* Use this slave address */
+
+/*
+ * Read a register from the sensor
+ * Takes the address of the register as a 16 bit short
+ * Returns the value of the register
+ */
+short Encoder::read(short registerAddress){
+	short command = 0b0100000000000000; // PAR=0 R/W=R
+	command = command | registerAddress;
+
+	//Add a parity bit on the the MSB
+	command |= ((short)calcEvenParity(command)<<15);
+
+	//Split the command into two bytes
+	char right_byte = command & 0xFF;
+	char left_byte = ( command >> 8 ) & 0xFF;
+
+	//Return the data, stripping the parity and error bits
+	return (( ( left_byte & 0xFF ) << 8 ) | ( right_byte & 0xFF )) & ~0xC000;
+}
+
+/*
+ * Write to a register
+ * Takes the 16-bit  address of the target register and the 16 bit short of data
+ * to be written to that register
+ * Returns the value of the register after the write has been performed. This
+ * is read back from the sensor to ensure a sucessful write.
+ */
+short Encoder::write(short registerAddress, short data) {
+
+	short command = 0b0000000000000000; // PAR=0 R/W=W
+	command |= registerAddress;
+
+	//Add a parity bit on the the MSB
+	command |= ((short)calcEvenParity(command)<<15);
+
+	//Split the command into two bytes
+	char right_byte = command & 0xFF;
+	char left_byte = ( command >> 8 ) & 0xFF;
+	
+	short dataToSend = 0b0000000000000000;
+	dataToSend |= data;
+
+	//Craft another packet including the data and parity
+	dataToSend |= ((short)calcEvenParity(dataToSend)<<15);
+	right_byte = dataToSend & 0xFF;
+	left_byte = ( dataToSend >> 8 ) & 0xFF;
+
+	//Return the data, stripping the parity and error bits
+	return (( ( left_byte & 0xFF ) << 8 ) | ( right_byte & 0xFF )) & ~0xC000;
+}
+
+int main(void) {
 	int file_i2c;
 	int length;
 	unsigned char buffer[60] = {0};
@@ -48,3 +103,4 @@
 		/* ERROR HANDLING: i2c transaction failed */
 		printf("Failed to write to the i2c bus.\n");
 	}
+}

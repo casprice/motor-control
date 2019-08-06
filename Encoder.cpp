@@ -18,13 +18,13 @@
  * Description: Default constructor for Encoder. Initializes the Encoder values to 
  * zero. 
  */
-Encoder::Encoder(unsigned int a_bus, unsigned int a_address) 
+Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution) 
 				: I2CDevice(a_bus, a_address) {
 	bus = a_bus;
 	address = a_address;
+	resolution = a_resolution;
 	angle = 0;
-	memset(buffer, 0, sizeof(unsigned char));
-	writeRegister(buffer, ANGLLSB_REG, ANGLMSB_REG);
+	zeroPosition = 0;
 	setZeroPosition();
 }
 
@@ -39,24 +39,8 @@ Encoder::Encoder(unsigned int a_bus, unsigned int a_address)
  * Return value: -1 if error occurred, 0 if successful.
  */
 int Encoder::setZeroPosition(void) {
-	// Write 0 int OTP zero position register to clear
-	memset(buffer, 0, sizeof(unsigned char));
-	if(writeRegister(buffer, ZEROLSB_REG, ZEROMSB_REG) == -1) {
-		perror("Encoder: Could not write zero position.\n");
-		return -1;
-	}
-
-	// Read angle information
-	if(readRegister(buffer) == -1) {
-		perror("Encoder: Could not read zero position.\n");
-		return -1;
-	}
-
-	// Write previous read angle position into OTP zero position register
-	if(writeRegister(buffer, ZEROLSB_REG, ZEROMSB_REG) == -1) {
-		perror("Encoder: Could not write zero position.\n");
-		return -1;
-	}
+	calcRotation();
+	zeroPosition = angle;
 
 	return 0;
 }
@@ -72,16 +56,10 @@ int Encoder::setZeroPosition(void) {
  * 
  * Return value:
  */
-double Encoder::calcRotation(double resolution) {
-	//double rotation;
+double Encoder::calcRotation() {
+	unsigned char * result = readRegisters(2, ANGLMSB_REG);
+	angle = toDegree(toDecimal(result)) - zeroPosition;
 
-	writeRegister(buffer, ANGLLSB_REG, ANGLMSB_REG);
-	readRegister(buffer);
-
-	angle = toDegree(resolution, (double)toDecimal(buffer));
-
-	//angle = (double)rotation - zeroPosition;
-	
 	return 1;
 }
 
@@ -94,6 +72,10 @@ double Encoder::calcRotation(double resolution) {
  */
 double Encoder::getAngle(void) {
 	return angle;
+}
+
+double Encoder::getZero(void) {
+	return zeroPosition;
 }
 
 /**
@@ -120,7 +102,7 @@ short Encoder::toDecimal(unsigned char * buf) {
  * 
  * Parameters:
  */
-double Encoder::toDegree(double resolution, double num) {
+double Encoder::toDegree(double num) {
   return (num / resolution) * NUM_DEG;
 }
 

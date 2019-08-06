@@ -1,0 +1,4 @@
+*.o
+Driver
+fpga/
+notes.txt
