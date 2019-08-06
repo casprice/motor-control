@@ -29,7 +29,7 @@ class Encoder : protected I2CDevice {
     void calcRotation();
     double getAngle(void);
     double getZero(void);
-    short toDecimal(unsigned char * buf);
+    short toDecimal(unsigned char* buf);
     double convertNum(double num, int conversion);
     
     ~Encoder(void);

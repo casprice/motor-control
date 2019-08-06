@@ -20,12 +20,12 @@
  *             a_Kd - PID derivative argument
  */
 PID::PID(double a_Kp, double a_Ki, double a_Kd) {
-    Kp = a_Kp;
-    Ki = a_Ki;
-    Kd = a_Kd;
-    totalError = 0;
-    prevError = 0;
-    dutyCycle = 0;
+  Kp = a_Kp;
+  Ki = a_Ki;
+  Kd = a_Kd;
+  totalError = 0;
+  prevError = 0;
+  dutyCycle = 0;
 }
 
 /**
@@ -37,21 +37,23 @@ PID::PID(double a_Kp, double a_Ki, double a_Kd) {
  *             goal - angle we want to move the motor to
  * Return value: None.
  */
-void PID::updatePWM(PWM& pwm, Encoder * encoder, int goal) {
-    double current = encoder.getAngle();
-    
-    // Calculate the new duty cycle value from PID control
-    dutyCycle = (Kp * (goal - current)) + Ki * totalError + Kd * prevError;
+void PID::updatePWM(PWM& pwm, shared_ptr<Encoder> encoder, int goal) {
+  // check that goal should not exceed limits
 
-    // Ensure new duty cycle doesn't exceed min or max possible values
-    dutyCycle = clip(abs(dutyCycle), MIN_DUTY, MAX_DUTY);
-    
-    // Set new duty cycle
-    pwm.setDutyCycle(dutyCycle);
+  double current = encoder.getAngle();
 
-    // Adjust error
-    totalError += goal - current;
-    prevError += goal - current;
+  // Calculate the new duty cycle value from PID control
+  dutyCycle = (Kp * (goal - current)) + Ki * totalError + Kd * prevError;
+
+  // Ensure new duty cycle doesn't exceed min or max possible values
+  dutyCycle = clip(abs(dutyCycle), MIN_DUTY, MAX_DUTY);
+  
+  // Set new duty cycle
+  pwm.setDutyCycle(dutyCycle);
+
+  // Adjust error
+  totalError += goal - current;
+  prevError += goal - current;
 }
 
 /**
@@ -63,11 +65,11 @@ void PID::updatePWM(PWM& pwm, Encoder * encoder, int goal) {
  * Return value: None.
  */
 void PID::updatePin(GPIO& pin, bool invert) {
-    if((dutyCycle < 0) != invert) {
-        pin.setValue(GPIO::HIGH);
-    } else {
-        pin.setValue(GPIO::LOW);
-    }
+  if((dutyCycle < 0) != invert) {
+    pin.setValue(GPIO::HIGH);
+  } else {
+    pin.setValue(GPIO::LOW);
+  }
 }
 
 /**
@@ -77,7 +79,7 @@ void PID::updatePin(GPIO& pin, bool invert) {
  * Return value: None.
  */
 void PID::clearKi(void) {
-    totalError = 0;
+  totalError = 0;
 }
 
 /**
