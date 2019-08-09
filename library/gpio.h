@@ -57,6 +57,7 @@ public:
 	int getNumber() { return number; } /**< Returns the GPIO number as an int. */
 
 	// General Input and Output Settings
+	int setUpPin(void);
 	int setDirection(GPIO::DIRECTION);
 	int setValue(GPIO::VALUE);
 	GPIO::VALUE getValue();

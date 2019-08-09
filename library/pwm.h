@@ -49,7 +49,7 @@ private:
 	float analogMax;        //defaults to 3.3V
 
 public:
-	PWM(string pinName);
+	PWM(int freq);
 	
 	int setPeriod(unsigned int period_ns);
 	unsigned int getPeriod();

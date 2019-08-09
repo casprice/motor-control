@@ -12,11 +12,13 @@
 #define ANGLMSB_REG 0xFE   // bits 0..7
 #define ANGLLSB_REG 0xFF   // bits 0..5
 #define RESOLUTION 16384.0 // 14 bits
+#define DT 0.1
 
 class Encoder {
   private:
     double zeroPosition = 0;
-    double angle = 0;
+    double prevAngle = 0;
+    double currAngle = 0;
     double resolution;
 
     I2CBus *busTracker;
@@ -26,9 +28,10 @@ class Encoder {
             double a_resolution=RESOLUTION);
 
     void setZeroPosition(void);
-    void calcRotation();
-    double getAngle(void);
+    void calcRotation(void);
     double getZero(void);
+    double getAngle(void);
+    double getVelocity(void);
     short toDecimal(unsigned char* buf);
     double convertNum(double num, int conversion);
     

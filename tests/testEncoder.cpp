@@ -21,17 +21,17 @@ int main(void) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  Encoder encoder;
+  Encoder* encoder = new Encoder(2, 0x40);
 
   // Output calculated angle
   while(running) {
     printf("\r");
 
-    encoder.calcRotation();
-    cout << "Zero: " << encoder.getZero() << " | Angle: " << encoder.getAngle() << "    ";
+    encoder->calcRotation();
+    cout << "Zero: " << encoder->getZero() << " | Angle: " << encoder->getAngle() << "    ";
 
     fflush(stdout);
-    sleep(0.1); // sleep for 1 second
+    sleep(DT); // sleep for 1 second
   }
   
   cout << endl;

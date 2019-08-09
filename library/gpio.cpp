@@ -44,108 +44,118 @@ using namespace std;
  * @param number The GPIO number to be exported
  */
 GPIO::GPIO(int number) {
-	this->number = number;
-	this->debounceTime = 0;
-	this->togglePeriod=100;
-	this->toggleNumber=-1; //infinite number
-	this->callbackFunction = NULL;
-	this->threadRunning = false;
+  this->number = number;
+  this->debounceTime = 0;
+  this->togglePeriod = 100;
+  this->toggleNumber = -1; //infinite number
+  this->callbackFunction = NULL;
+  this->threadRunning = false;
 
-	ostringstream s;
-	s << "gpio" << number;
-	this->name = string(s.str());
-	this->path = GPIO_PATH + this->name + "/";
-	if (this->exportGPIO() == -1) printf("big fat ERROR");
-	// need to give Linux time to set up the sysfs structure
-	usleep(250000); // 250ms delay
+  ostringstream s;
+  s << "gpio" << number;
+  this->name = string(s.str());
+  this->path = GPIO_PATH + this->name + "/";
+
+  //this->unexportGPIO();
+  // Export GPIO pin number
+  /*if (exportGPIO() == -1) {
+    cerr << "Unable to export GPIO pin " << this->number;
+  }*/
+  // need to give Linux time to set up the sysfs structure
+  usleep(250000); // 250ms delay
+
+  // Prepare the pin for use
+  if (setUpPin() == -1) {
+    cerr << "Unable to set up GPIO pin " << this->number;
+  }
 }
-/**
- * Private write method that writes a single string value to a file in the path provided
- * @param Path The sysfs path of the file to be modified
- * @param Filename The file to be written to in that path
- * @param String value The value to be written to the file
- * @return
- */
-
-/* int GPIO::write(string path, string filename, string value){
-   ofstream fs;
-   fs.open((path + filename).c_str());
-   if (!fs.is_open()){
-	   perror("GPIO: write failed to open file ");
-	   return -1;
-   }
-   fs << value;
-   fs.close();
-   return 0;
-}*/
-
-/*string GPIO::read(string path, string filename){
-   ifstream fs;
-   fs.open((path + filename).c_str());
-   if (!fs.is_open()){
-	   perror("GPIO: read failed to open file ");
-    }
-   string input;
-   getline(fs,input);
-   fs.close();
-   return input;
-}*/
 
 /**
- * Private write method that writes a single int value to a file in the path provided
- * @param Path The sysfs path of the file to be modified
- * @param Filename The file to be written to in that path
- * @param int value The int value to be written to the file
- * @return
+ * 
  */
-/*int GPIO::write(string path, string filename, int value){
-   stringstream s;
-   s << value;
-   return write(path,filename,s.str());
-}*/
+int GPIO::setUpPin(void) {
+  if (setDirection(OUTPUT) == -1) {
+    return -1;
+  }
+  if (setValue(HIGH) == -1) {
+    return -1;
+  }
+  return 0;
+}
 
 /**
  * Private method to export the GPIO
  * @return int that describes if the operation fails
  */
-int GPIO::exportGPIO(){
-   return write(GPIO_PATH, "export", this->number);
+int GPIO::exportGPIO() {
+  return write(GPIO_PATH, "export", this->number);
 }
 
-int GPIO::unexportGPIO(){
-   return write(GPIO_PATH, "unexport", this->number);
+/**
+ * 
+ */
+int GPIO::unexportGPIO() {
+  return write(GPIO_PATH, "unexport", this->number);
 }
 
-int GPIO::setDirection(GPIO::DIRECTION dir){
-   switch(dir){
-   case INPUT: return write(this->path, "direction", "in");
-      break;
-   case OUTPUT:return write(this->path, "direction", "out");
-      break;
-   }
-   return -1;
+/**
+ * 
+ */
+int GPIO::setDirection(DIRECTION dir){
+  switch(dir){
+  case INPUT: 
+    return write(this->path, "direction", "in");
+  case OUTPUT: 
+    return write(this->path, "direction", "out");
+  }
+  return -1;
 }
 
-int GPIO::setValue(GPIO::VALUE value){
-   switch(value){
-   case HIGH: return write(this->path, "value", "1");
-      break;
-   case LOW: return write(this->path, "value", "0");
-      break;
-   }
-   return -1;
+/**
+ * 
+ */
+int GPIO::setValue(VALUE value){
+  switch(value){
+  case HIGH: 
+    return write(this->path, "value", "1");
+  case LOW: 
+    return write(this->path, "value", "0");
+  }
+  return -1;
 }
 
+/**
+ * 
+ */
 GPIO::VALUE GPIO::getValue(){
-	string input = read(this->path, "value");
-	if (input == "0") return LOW;
-	else return HIGH;
+  string input = read(this->path, "value");
+  if (input == "0") {
+    return LOW;
+  } else {
+    return HIGH;
+  }
 }
 
+/**
+ * 
+ */
 GPIO::DIRECTION GPIO::getDirection(){
-	string input = read(this->path, "direction");
-	if (input == "in") return INPUT;
-	else return OUTPUT;
+  string input = read(this->path, "direction");
+  if (input == "in") {
+    return INPUT;
+  } else {
+    return OUTPUT;
+  }
 }
 
-GPIO::~GPIO() {}
+/**
+ * 
+ */
+GPIO::~GPIO() {
+  if (this->getDirection() == GPIO::OUTPUT) {
+    this->setDirection(INPUT);
+  }
+  if (this->getValue() == GPIO::HIGH) {
+    this->setValue(LOW);
+  }
+}

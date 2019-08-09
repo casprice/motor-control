@@ -37,12 +37,13 @@
 
 #define MAX_BUF 64
 
-PWM::PWM(string pinName) {
-	this->name = pinName;
+PWM::PWM(int freq) {
+	//this->name = pinName;
 	//this->path = PWM_PATH + this->name + "/";
 	this->path = PWM_PATH;
 	this->analogFrequency = 100000;
 	this->analogMax = 3.3;
+	setFrequency(freq);
 }
 
 int PWM::setPeriod(unsigned int period_ns){
