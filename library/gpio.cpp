@@ -45,11 +45,6 @@ using namespace std;
  */
 GPIO::GPIO(int number) {
   this->number = number;
-  this->debounceTime = 0;
-  this->togglePeriod = 100;
-  this->toggleNumber = -1; //infinite number
-  this->callbackFunction = NULL;
-  this->threadRunning = false;
 
   ostringstream s;
   s << "gpio" << number;
@@ -152,10 +147,10 @@ GPIO::DIRECTION GPIO::getDirection(){
  * 
  */
 GPIO::~GPIO() {
-  if (this->getDirection() == GPIO::OUTPUT) {
-    this->setDirection(INPUT);
-  }
   if (this->getValue() == GPIO::HIGH) {
     this->setValue(LOW);
+  }
+  if (this->getDirection() == GPIO::OUTPUT) {
+    this->setDirection(INPUT);
   }
 }

@@ -10,7 +10,7 @@
 #define MIN_DUTY 0
 #define MAX_DUTY 100
 #define TORQUE_CONST 6.18 // mNm/A
-#define GEAR_RATIO 33     // 33:1
+#define GEAR_RATIO 44     // 44:1
 #define GEARBOX_EFF 81    // 81% efficiency
 
 /**
@@ -96,7 +96,8 @@ double PID::getCurrent(int ch) {
  */
 double PID::getTorque(int ch) {
   double current = rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
-  return current * (TORQUE_CONST/1000) * (GEARBOX_EFF/100);
+  // Multiply by torque constant * gear ratio * gearbox efficiency
+  return current * (TORQUE_CONST/1000) * GEAR_RATIO * (GEARBOX_EFF/100);
 }
 
 /**

@@ -68,7 +68,7 @@ class pid_ctl_dir_en:
         self.previous_error = 0
     def update(self, current, goal, dir_inverted=False):
         #adjusted_duty = (self.p*(goal-current)) + (self.i*self.total_error) + (self.d*self.previous_error)
-        adjusted_duty = 5
+        adjusted_duty = 10
         if 'bbb_test' in build_params:
             # direction
             if ((adjusted_duty < 0) != dir_inverted):

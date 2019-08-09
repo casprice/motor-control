@@ -20,37 +20,38 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 }
 
 int main(void) {
-  double maxTorque = 0; 
+  double finalTorque = 0; 
 
   // Set up Ctrl-C Interrupt handling
   signal(SIGINT, __signal_handler);
   running = 1;
 
   // GPIO/PWM setup
-  PWM pwm(20000);
+  PWM pwm(30000);
+  //pwm.setPeriod(100000);
+  //pwm.setDutyCycle(50.0);
   GPIO dir(M2_DIR);
   GPIO enable(M2_ENABLE);
-  //GPIO pwm_pin(PWM_PIN);
 
   //shared_ptr<Encoder> enc(new Encoder);
 
   PID* pidctl = new PID(2,0,0,NULL);
-  pwm.setDutyCycle(1.0);
+  
   
   // Output calculated angle
   while(running) {
     
     //pidctl->updatePWM(&pwm, 30);
     //pidctl->updatePin(&dir, false);
-    maxTorque = pidctl->getCurrent(MOTOR3_ADC);
+    finalTorque = pidctl->getTorque(MOTOR3_ADC);
 
-    cout << "\r" << maxTorque;
+    cout << "\r" << finalTorque;
 
     fflush(stdout);
     sleep(0.1); // sleep for 1 second
   }
   
-  cout << "\r" << maxTorque;
-
+  cout << "\rFinal torque: " << finalTorque;
+  
   cout << endl;
 }
