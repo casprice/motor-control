@@ -2,6 +2,7 @@
 #include "../Driver.hpp"
 #include <iostream>
 #include <signal.h>
+#include <rc/motor.h>
 
 using namespace std;
 
@@ -20,38 +21,38 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 }
 
 int main(void) {
-  double finalTorque = 0; 
+  double dutyCycle = 25.0; 
 
   // Set up Ctrl-C Interrupt handling
   signal(SIGINT, __signal_handler);
   running = 1;
 
   // GPIO/PWM setup
-  PWM pwm(30000);
+  PWM pwm(20000);
   //pwm.setPeriod(100000);
-  //pwm.setDutyCycle(50.0);
+  pwm.setDutyCycle(0.75);
   GPIO dir(M2_DIR);
   GPIO enable(M2_ENABLE);
 
+  //rc_motor_init_freq(20000);
+  //rc_motor_set(1, 0.85); // P9_14
+  //rc_motor_set(3, 0.85); // P8_19
+
   //shared_ptr<Encoder> enc(new Encoder);
 
-  PID* pidctl = new PID(2,0,0,NULL);
-  
+  //PID* pidctl = new PID(2,0,0,NULL);
   
   // Output calculated angle
   while(running) {
-    
     //pidctl->updatePWM(&pwm, 30);
     //pidctl->updatePin(&dir, false);
-    finalTorque = pidctl->getTorque(MOTOR3_ADC);
-
-    cout << "\r" << finalTorque;
+    cout << "\r" << dutyCycle;
 
     fflush(stdout);
-    sleep(0.1); // sleep for 1 second
+    sleep(1); // sleep for 1 second
   }
-  
-  cout << "\rFinal torque: " << finalTorque;
-  
+
+  rc_motor_cleanup();
+    
   cout << endl;
 }

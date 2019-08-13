@@ -27,8 +27,8 @@
 #include <string>
 using std::string;
 
-//#define PWM_PATHH "/sys/devices/platform/ocp/48300000.epwmss/48300200.pwm/pwm/pwmchip1/pwm-1:0/"
-#define PWM_PATH "/sys/class/pwm/pwm-1:0/"
+#define PWM_PATH "/sys/devices/platform/ocp/48300000.epwmss/48300200.pwm/pwm/pwmchip1/pwm-1:0/"
+//#define PWM_PATH "/sys/class/pwm/pwm-1:0/"
 #define PWM_PERIOD "period"
 #define PWM_DUTY "duty_cycle"
 #define PWM_POLARITY "polarity"
@@ -56,7 +56,7 @@ public:
 	int setFrequency(float frequency_hz);
 	float getFrequency();
 	int setDutyCycle(unsigned int duration_ns);
-	int setDutyCycle(double percentage);
+	int setDutyCycle(double duty);
 	unsigned int getDutyCycle();
 	float getDutyCyclePercent();
 

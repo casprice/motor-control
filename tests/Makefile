@@ -18,7 +18,7 @@ all: testEncoder testPID
 testPID: $(PID).o
 	$(CC) -o $(PID) $(CFLAGS) $(PID).o /usr/lib/librobotcontrol.so
 
-testPID.o: $(PID).cpp ../PID.cpp ../Driver.hpp ../library/gpio.cpp ../Encoder.hpp ../library/pwm.h
+testPID.o: $(PID).cpp ../PID.cpp ../Driver.hpp ../library/gpio.cpp ../Encoder.hpp ../library/pwm.cpp
 	$(CC) $(CFLAGS) -c $(PID).cpp
 
 testEncoder: $(ENCODER).o
