@@ -40,8 +40,9 @@
 using namespace std;
 
 /**
- * The constructor will set up the states and export the pin.
- * @param number The GPIO number to be exported
+ * Routine name: GPIO(int number)
+ * Description: The constructor will set up the states and export the pin.
+ * Parameters: number - The GPIO number to be exported
  */
 GPIO::GPIO(int number) {
   this->number = number;
@@ -66,7 +67,10 @@ GPIO::GPIO(int number) {
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
 int GPIO::setUpPin(void) {
   if (setDirection(OUTPUT) == -1) {
@@ -79,22 +83,30 @@ int GPIO::setUpPin(void) {
 }
 
 /**
- * Private method to export the GPIO
- * @return int that describes if the operation fails
+ * Routine name: exportGPIO(void)
+ * Description: Private method to export the GPIO
+ * Parameters: None
+ * Return value: int that describes if the operation fails
  */
-int GPIO::exportGPIO() {
+int GPIO::exportGPIO(void) {
   return write(GPIO_PATH, "export", this->number);
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
-int GPIO::unexportGPIO() {
+int GPIO::unexportGPIO(void) {
   return write(GPIO_PATH, "unexport", this->number);
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
 int GPIO::setDirection(DIRECTION dir){
   switch(dir){
@@ -107,7 +119,10 @@ int GPIO::setDirection(DIRECTION dir){
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
 int GPIO::setValue(VALUE value){
   switch(value){
@@ -120,7 +135,10 @@ int GPIO::setValue(VALUE value){
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
 GPIO::VALUE GPIO::getValue(){
   string input = read(this->path, "value");
@@ -132,7 +150,10 @@ GPIO::VALUE GPIO::getValue(){
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
+ * Return value:
  */
 GPIO::DIRECTION GPIO::getDirection(){
   string input = read(this->path, "direction");
@@ -144,7 +165,9 @@ GPIO::DIRECTION GPIO::getDirection(){
 }
 
 /**
- * 
+ * Routine name:
+ * Description:
+ * Parameters:
  */
 GPIO::~GPIO() {
   if (this->getValue() == GPIO::HIGH) {

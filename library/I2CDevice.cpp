@@ -8,10 +8,12 @@
 using namespace std;
 
 /**
- * Constructor for the I2CDevice class. It requires the bus number and device number. The constructor
- * opens a file handle to the I2C device, which is destroyed when the destructor is called
- * @param bus The bus number. Usually 0 or 1 on the BBB
- * @param device The device ID on the bus.
+ * Routine name: I2CDevice(unsigned int a_bus, unsigned int a_address)
+ * Description: Constructor for the I2CDevice class. It requires the bus number
+ *              and device number. The constructor opens a file handle to the 
+ *              I2C device, which is destroyed when the destructor is called.
+ * Parameters: bus - The bus number. Usually 0 or 1 on the BBB
+ *             device - The device ID on the bus.
  */
 I2CDevice::I2CDevice(unsigned int a_bus, unsigned int a_address) {
 	bus = a_bus;
@@ -21,8 +23,10 @@ I2CDevice::I2CDevice(unsigned int a_bus, unsigned int a_address) {
 }
 
 /**
- * Open a connection to an I2C device
- * @return -1 on failure to open to the bus or device, 0 on success.
+ * Routine name: openDevice(void)
+ * Description: Opens a connection to an I2C device.
+ * Parameters: None
+ * Return value: -1 on failure to open to the bus or device, 0 on success.
  */
 int I2CDevice::openDevice(void){
   string name = BBB_I2C_2;
@@ -53,10 +57,14 @@ int I2CDevice::openDevice(void){
 }
 
 /**
- * Write a single byte value to a single register. returns the number of bytes actually written, if it doesn't match then an error occurred (e.g. no response from the device)
- * @param registerAddress The register address
- * @param value The value to be written to the register
- * @return -1 on failure to write, 0 on success.
+ * Routine name: writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb)
+ * Description: Writes a single byte value to a single register. returns the
+ *              number of bytes actually written, if it doesn't match then an
+ *              error occurred (e.g. no response from the device).
+ * Parameters: buffer - the buffer to write to
+ *             lsb - the address of the least significant byte
+ *             msb - the address of the most significant byte
+ * Return values: -1 on failure to write, 0 on success.
  */
 int I2CDevice::writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb){
   buffer[0] = lsb;
@@ -70,9 +78,13 @@ int I2CDevice::writeRegister(unsigned char * buffer, unsigned int lsb, unsigned 
 }
 
 /**
- * Read a single register value from the address on the device. returns the number of bytes actually read, if it doesn't match then an error occurred (e.g. no response from the device)
- * @param registerAddress the address to read from
- * @return the byte value at the register address.
+ * Routine name: readRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb)
+ * Description: Reads a single register value from the address on the device.          
+ * Parameters: buffer - the buffer to read from
+ *             lsb - the address of the least significant byte
+ *             msb - the address of the most significant byte
+ * Return value: The number of bytes actually read, if it doesn't match then an error 
+ *               occurred (e.g. no response from the device)
  */
 int I2CDevice::readRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb){
   writeRegister(buffer, lsb, msb);
@@ -86,7 +98,10 @@ int I2CDevice::readRegister(unsigned char * buffer, unsigned int lsb, unsigned i
 }
 
 /**
- * Close the file handles and sets a temporary state to -1.
+ * Routine name: closeDevice(void)
+ * Description: Closes the file handles and sets a temporary state to -1.
+ * Parameters: None
+ * Return value: None
  */
 void I2CDevice::closeDevice(void){
 	close(file);
@@ -94,10 +109,12 @@ void I2CDevice::closeDevice(void){
 }
 
 /**
- * Closes the file on destruction, provided that it has not already been closed.
+ * Routine name: ~I2CDevice(void)
+ * Description: Closes the file on destruction, provided that it has not already been closed.
+ * Parameters: None
  */
 I2CDevice::~I2CDevice(void) {
-	if(file!=-1) {
-    close(file);
+	if(file != -1) {
+    closeDevice();
   }
 }

@@ -55,15 +55,21 @@ void Encoder::setZeroPosition(void) {
  *              including zero position correction. Convert angle to degrees
  * 							according to its resolution.
  * Parameters: None.
- * Return value: NOne.
+ * Return value: None.
  */
-void Encoder::calcRotation(void) {
-  unsigned char * result = busTracker->readRegisters(2, ANGLMSB_REG);
+int Encoder::calcRotation(void) {
+  unsigned char * result; 
+  if ((result = busTracker->readRegisters(2, ANGLMSB_REG)) == NULL) {
+    cerr << "\nLost connection to the encoder. Aborting." << endl;
+    return -1;
+  } 
   // Update previous angle
   prevAngle = currAngle;
 
   // Convert new angle to degrees within the bounds of -180 to 180 degrees
   currAngle = convertNum(toDecimal(result), RAW_TO_DEG) - RANGE_VAL - zeroPosition;
+
+  return 0;
 }
 
 /**

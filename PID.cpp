@@ -9,6 +9,8 @@
 
 #define MIN_DUTY 0.0
 #define MAX_DUTY 1.0
+#define MIN_ANGLE -95
+#define MAX_ANGLE 95
 #define TORQUE_CONST 6.18 // mNm/A
 #define GEAR_RATIO 44     // 44:1
 #define GEARBOX_EFF 81    // 81% efficiency
@@ -45,8 +47,9 @@ PID::PID(double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
  *             invert - whether to invert the direction of the motor
  * Return value: None.
  */
-double PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
-  // check that goal should not exceed limits
+void PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
+  // Check that goal angle does not exceed limits
+  clip(goalAngle, MIN_ANGLE, MAX_ANGLE, 1);
 
   // Calculate the new duty cycle value from PID control
   dutyCycle = rc_filter_march(&filter, goalAngle - encoder->getAngle())/100;
@@ -59,19 +62,24 @@ double PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
   }
   
   // Set new duty cycle using the magnitude
-  pwm->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY));
-  return dutyCycle;
+  pwm->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY, 0));
 }
 
 /**
- * 
+ * Routine name: getDutyCycle(void)
+ * Description:
+ * Parameters: None
+ * Return value:
  */
 double PID::getDutyCycle(void) {
   return dutyCycle;
 }
 
 /**
- * 
+ * Routine name: getCurrent(int ch)
+ * Description:
+ * Parameters:
+ * Return value:
  */
 double PID::getCurrent(int ch) {
   return rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
@@ -85,25 +93,31 @@ double PID::getCurrent(int ch) {
  */
 double PID::getTorque(int ch) {
   double current = rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
-  int i;
-  for(i=0;i<7;i++){
-    printf("%6.2f |", rc_adc_read_volt(i));
-  }
+
   // Multiply by torque constant * gear ratio * gearbox efficiency
   return current * (TORQUE_CONST/1000) * GEAR_RATIO * (GEARBOX_EFF/100);
   //return rc_adc_read_volt(ch);
 }
 
-double PID::getCurrent(int ch) {
-  return rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
-}
-
 /**
- * Ensure number doesn't exceed min or max angles
+ * Routine name: clip(double number, int min, int max, int err)
+ * Description: Ensure number doesn't exceed min or max values.
+ * Parameters: number - the number to clip
+ *             min - the minimum possible value
+ *             max - the maximum possible value
+ *             err - whether to print an error message
+ * Return value: number as a clipped value
  */
-double PID::clip(double number, int min, int max) {
-  if (number < min) number = min;
-  if (number > max) number = max;
+double PID::clip(double number, int min, int max, int err) {
+  if (number < min) {
+    number = min;
+    if (err) cerr << "\nInvalid value: " << number << " cannot be lower than " << min;
+  }
+  if (number > max) {
+    number = max;
+    if (err) cerr << "\nInvalid value: " << number << " cannot be higher than " << max;
+  }
+  
   return number;
 }
 

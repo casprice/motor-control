@@ -65,13 +65,13 @@ int I2CBus::openDevice(void) {
 
   // Open the I2C bus
   if((file = open(name.c_str(), O_RDWR)) < 0){
-    perror("I2C: failed to open the bus\n");
+    perror("\n\rI2C: failed to open the bus");
     return -1;
   }
 
   // Initiate communication with the device
   if(ioctl(file, I2C_SLAVE, address) < 0){
-    perror("I2C: Failed to connect to the device\n");
+    perror("\n\rI2C: Failed to connect to the device");
     return -1;
   }
   
@@ -90,8 +90,8 @@ int I2CBus::writeRegister(unsigned char value) {
   buffer[0] = value;
   
   if (write(file, buffer, 1) != 1){
-    perror("I2C: Failed to write to the device\n");
-    return 1;
+    perror("\n\rI2C: Failed to write to the device");
+    return -1;
   }
 
   return 0;
@@ -107,9 +107,11 @@ int I2CBus::writeRegister(unsigned char value) {
  */
 unsigned char * I2CBus::readRegisters(unsigned int number, unsigned int fromAddress) {
 	unsigned char* data = new unsigned char[number];
-  writeRegister(fromAddress);
+  if(writeRegister(fromAddress) == -1) {
+    return NULL;
+  }
   if (read(file, data, number) != (int)number) {
-    perror("I2C: Failed to read in the full buffer.\n");
+    perror("\n\rI2C: Failed to read in the full buffer.");
     return NULL;
   }
 	return data;

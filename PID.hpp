@@ -5,7 +5,7 @@
 #ifndef PID_HPP
 #define PID_HPP
 
-#include <memory>
+#include <memory>   // shared_ptr
 #include <rc/adc.h>
 #include <rc/math/filter.h>
 using namespace std;
@@ -24,13 +24,13 @@ class PID {
     public:
         PID(double Kp=0, double Ki=0, double Kd=0, shared_ptr<Encoder> enc=NULL);
         
-        double updatePWM(PWM* pwm, GPIO* pin, int goalAngle, bool invert);
+        void updatePWM(PWM* pwm, GPIO* pin, int goalAngle, bool invert);
         double getDutyCycle(void);
         double getCurrent(int ch);
         double getTorque(int ch);
         void setTorque(void);
         void setAngle(void);
-        double clip(double number, int min, int max);
+        double clip(double number, int min, int max, int err);
 
         ~PID(void);
 };
