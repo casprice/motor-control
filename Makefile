@@ -5,7 +5,7 @@
 #       make clean              # This will safely remove old stuff
 CC = g++
 CFLAGS = -Wall -pedantic -g
-LIBS = -lncurses
+LIBS = -lncurses  /usr/lib/librobotcontrol.so
 
 TARGET = Driver
 

@@ -2,4 +2,4 @@
 Driver
 fpga/
 notes.txt
-tests/testEncoder.o
+tests/**/*.o

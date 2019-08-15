@@ -3,13 +3,15 @@
  * Description: TODO
  */
 
-#include <cmath> // abs()
+#include <cmath> // fabs()
 
 #include "PID.hpp"
-#include "Driver.hpp"
 
-#define MIN_DUTY 0
-#define MAX_DUTY 100
+#define MIN_DUTY 0.0
+#define MAX_DUTY 1.0
+#define TORQUE_CONST 6.18 // mNm/A
+#define GEAR_RATIO 44     // 44:1
+#define GEARBOX_EFF 81    // 81% efficiency
 
 /**
  * Routine name: PID(double a_Kp, double a_Ki, double a_Kd)
@@ -19,14 +21,18 @@
  *             a_Ki - PID integral argument
  *             a_Kd - PID derivative argument
  */
-PID(double a_Kp, double a_Ki, double a_Kd, shared_ptr<Encoder> enc) {
-  Kp = a_Kp;
-  Ki = a_Ki;
-  Kd = a_Kd;
+PID::PID(double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
   encoder = enc;
-  totalError = 0;
-  prevError = 0;
   dutyCycle = 0;
+  filter = RC_FILTER_INITIALIZER;
+  // Initialize PID filter
+  if (rc_filter_pid(&filter, Kp, Ki, Kd, 4*DT, DT)) {
+    cerr << "ERROR: failed to run rc_filter_pid()\n";
+  }
+  // Initialize analog-to-digital converter
+  if (rc_adc_init()) {
+    cerr << "ERROR: failed to run rc_init_adc()\n";
+  }
 }
 
 /**
@@ -34,53 +40,67 @@ PID(double a_Kp, double a_Ki, double a_Kd, shared_ptr<Encoder> enc) {
  * Description: Configures the PWM pin for output by adjusting the duty cycle
  *              through PID control based on current angle and goal.
  * Parameters: pwm - reference to PWM pin
- *             current - current angle as calculated by encoder
- *             goal - angle we want to move the motor to
+ *             dir - the GPIO direction pin
+ *             goalAngle - angle we want to move the motor to
+ *             invert - whether to invert the direction of the motor
  * Return value: None.
  */
-void updatePWM(PWM& pwm, int goal) {
+double PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
   // check that goal should not exceed limits
 
-  double current = encoder.getAngle();
-
   // Calculate the new duty cycle value from PID control
-  dutyCycle = (Kp * (goal - current)) + Ki * totalError + Kd * prevError;
+  dutyCycle = rc_filter_march(&filter, goalAngle - encoder->getAngle())/100;
 
-  // Ensure new duty cycle doesn't exceed min or max possible values
-  dutyCycle = clip(abs(dutyCycle), MIN_DUTY, MAX_DUTY);
-  
-  // Set new duty cycle
-  pwm.setDutyCycle(dutyCycle);
-
-  // Adjust error
-  totalError += goal - current;
-  prevError += goal - current;
-}
-
-/**
- * Routine name: updatePin(PWM& pwm, double current, int goal)
- * Description: Configures a GPIO pin for output. Depending on value of invert,
- *              set value to high or low.
- * Parameters: pin - reference to GPIO pin
- *             invert - whether to invert pin
- * Return value: None.
- */
-void updatePin(GPIO& pin, bool invert) {
+  // Adjusts direction depending on the sign of dutyCycle
   if((dutyCycle < 0) != invert) {
-    pin.setValue(GPIO::HIGH);
+    dir->setValue(GPIO::HIGH);
   } else {
-    pin.setValue(GPIO::LOW);
+    dir->setValue(GPIO::LOW);
   }
+  
+  // Set new duty cycle using the magnitude
+  pwm->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY));
+  return dutyCycle;
 }
 
 /**
- * Routine name: clearKi(void)
- * Description: Zeroes-out integral part of PID.
- * Parameters: None.
- * Return value: None.
+ * 
  */
-void clearKi(void) {
-  totalError = 0;
+double PID::getDutyCycle(void) {
+  return dutyCycle;
+}
+
+/**
+ * 
+ */
+double PID::getCurrent(int ch) {
+  return rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
+}
+
+/**
+ * 3 - AIN0
+ * 4 - AIN1
+ * 5 - AIN2
+ * 6 - AIN3
+ */
+double PID::getTorque(int ch) {
+  double current = rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
+  int i;
+  for(i=0;i<7;i++){
+    printf("%6.2f |", rc_adc_read_volt(i));
+  }
+  // Multiply by torque constant * gear ratio * gearbox efficiency
+  return current * (TORQUE_CONST/1000) * GEAR_RATIO * (GEARBOX_EFF/100);
+  //return rc_adc_read_volt(ch);
+}
+
+/**
+ * Ensure number doesn't exceed min or max angles
+ */
+double PID::clip(double number, int min, int max) {
+  if (number < min) number = min;
+  if (number > max) number = max;
+  return number;
 }
 
 /**
@@ -88,4 +108,7 @@ void clearKi(void) {
  * Description: Default desctructor for PID.
  * Parameters: None.
  */
-~PID(void) {}
+PID::~PID(void) {
+  rc_filter_free(&filter);
+  rc_adc_cleanup();
+}

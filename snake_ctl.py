@@ -12,7 +12,7 @@ build_params = ['bbb_test']
 
 pin_map = {
 	"pwm": "P8_19",
-	"enable": "P8_17",
+	"enable": "P8_10",
 	"direction": "P8_18"
 }
 
@@ -67,7 +67,8 @@ class pid_ctl_dir_en:
         self.total_error = 0
         self.previous_error = 0
     def update(self, current, goal, dir_inverted=False):
-        adjusted_duty = (self.p*(goal-current)) + (self.i*self.total_error) + (self.d*self.previous_error)
+        #adjusted_duty = (self.p*(goal-current)) + (self.i*self.total_error) + (self.d*self.previous_error)
+        adjusted_duty = 10
         if 'bbb_test' in build_params:
             # direction
             if ((adjusted_duty < 0) != dir_inverted):
@@ -153,7 +154,8 @@ def main():
         stdscr.clear()
         stdscr.addstr(0,1,"Angle: {}".format(value))
 
-        temp_list = (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
+        temp_list = 8192
+        #temp_list = (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
         
         stdscr.addstr(1,1, "Postion: {}".format(truncate(i2c_device.toDegree(temp_list)-180, 3)))
         # pid section
@@ -163,5 +165,6 @@ def main():
         if (counter % 1000) == 0:
             pid_ctl.clear_i()
         sleep(0.001)
+    GPIO.output(pin_map["enable"], GPIO.LOW)
 if __name__ == '__main__':
     main()

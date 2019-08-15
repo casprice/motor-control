@@ -47,16 +47,16 @@ public:
 	enum VALUE{ LOW=0, HIGH=1 };
 
 private:
-	int number;			/**< The GPIO number of the object */
-	int debounceTime;   /**< The debounce time in milliseconds */
-	string name;		/**< The name of the GPIO e.g. gpio50 */
-	string path;  		/**< The full path to the GPIO e.g. /sys/class/gpio/gpio50/ */
+	int number;			// The GPIO number of the object
+	string name;		// The name of the GPIO e.g. gpio50
+	string path;  	// The full path to the GPIO e.g. /sys/class/gpio/gpio50/
 
 public:
 	GPIO(int number);
-	int getNumber() { return number; } /**< Returns the GPIO number as an int. */
+	int getNumber() { return number; } // Returns the GPIO number as an int.
 
 	// General Input and Output Settings
+	int setUpPin(void);
 	int setDirection(GPIO::DIRECTION);
 	int setValue(GPIO::VALUE);
 	GPIO::VALUE getValue();
@@ -67,16 +67,8 @@ public:
 	~GPIO();  //destructor will unexport the pin
 
 private:
-	//int write(string path, string filename, string value);
-	//int write(string path, string filename, int value);
-	//string read(string path, string filename);
-	
 	ofstream stream;
 	pthread_t thread;
-	CallbackType callbackFunction;
-	bool threadRunning;
-	int togglePeriod;  //default 100ms
-	int toggleNumber;  //default -1 (infinite)
 };
 
 #include "gpio.cpp"

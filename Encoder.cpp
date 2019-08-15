@@ -20,8 +20,7 @@ using namespace std;
 #define RAW_TO_RAD 2
 #define DEG_TO_RAD 3
 #define RAD_TO_DEG 4
-#define MIN_VALUE -180
-#define MAX_VALUE 180
+#define RANGE_VAL 180
 
 /**
  * Routine name: Encoder::Encoder(unsigned int bus, unsigned int address)
@@ -47,7 +46,7 @@ Encoder::Encoder(unsigned int a_bus, unsigned int a_address, double a_resolution
  */
 void Encoder::setZeroPosition(void) {
   calcRotation();
-  zeroPosition = angle;
+  zeroPosition = currAngle;
 }
 
 /**
@@ -60,29 +59,11 @@ void Encoder::setZeroPosition(void) {
  */
 void Encoder::calcRotation(void) {
   unsigned char * result = busTracker->readRegisters(2, ANGLMSB_REG);
-  // Convert angle to degrees within the bounds of -180 to 180 degrees
-  angle = convertNum(toDecimal(result), RAW_TO_DEG) + 180 - zeroPosition;
+  // Update previous angle
+  prevAngle = currAngle;
 
-  /* Ensure angle is within boundaries
-  if (angle < MIN_VALUE) {
-    cerr << "Exceeded min angle! Angle at: " << angle;
-    angle = MIN_VALUE;
-  }
-
-  if (angle > MAX_VALUE) {
-    angle = MAX_VALUE;
-    cerr << "Exceeded max angle! Angle at: " << angle;
-  }*/
-}
-
-/**
- * Routine name: Encoder::getAngle(void)
- * Description: Returns the current angle position in degrees.
- * Parameters: None.
- * Return value: The angle position.
- */
-double Encoder::getAngle(void) {
-  return angle;
+  // Convert new angle to degrees within the bounds of -180 to 180 degrees
+  currAngle = convertNum(toDecimal(result), RAW_TO_DEG) - RANGE_VAL - zeroPosition;
 }
 
 /**
@@ -93,6 +74,26 @@ double Encoder::getAngle(void) {
  */
 double Encoder::getZero(void) {
   return zeroPosition;
+}
+
+/**
+ * Routine name: Encoder::getAngle(void)
+ * Description: Returns the current angle position in degrees.
+ * Parameters: None.
+ * Return value: The angle position.
+ */
+double Encoder::getAngle(void) {
+  return currAngle;
+}
+
+/**
+ * Routine name: Encoder::getVelocity(void)
+ * Description: Returns the current velocity of the motor in degrees/second.
+ * Parameters: None.
+ * Return value: The angle position.
+ */
+double Encoder::getVelocity(void) {
+  return (currAngle - prevAngle) / DT;
 }
 
 /**
