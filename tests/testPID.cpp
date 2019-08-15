@@ -21,6 +21,8 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 }
 
 int main(void) {
+  double dutyCycle = 25.0; 
+
   // Set up Ctrl-C Interrupt handling
   signal(SIGINT, __signal_handler);
   running = 1;

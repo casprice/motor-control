@@ -59,6 +59,7 @@ void setup(void) {
  */
 int main() {
   int value = 0;   // angle we want motor to spin to
+  int counter = 0; // counter for Ki
   char buf[20];    // buffer to print angle and position vals
 
   // Register keyboard interrupt

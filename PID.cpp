@@ -94,6 +94,10 @@ double PID::getTorque(int ch) {
   //return rc_adc_read_volt(ch);
 }
 
+double PID::getCurrent(int ch) {
+  return rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
+}
+
 /**
  * Ensure number doesn't exceed min or max angles
  */

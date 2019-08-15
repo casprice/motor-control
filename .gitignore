@@ -3,3 +3,5 @@ Driver
 fpga/
 notes.txt
 tests/**/*.o
+snake_ctl/
+__MACOSX/
