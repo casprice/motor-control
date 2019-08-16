@@ -4,12 +4,20 @@
 # or
 #       make clean              # This will safely remove old stuff
 CC = g++
-CFLAGS = -Wall -pedantic -g
+CFLAGS = -Wall -pedantic -g -pthread
 LIBS = -lncurses /usr/lib/librobotcontrol.so
 
-TARGET = Driver
+TARGET = MotorControl
 
 DEPENDENCIES = \
+		MotorControl.cpp \
+		MotorControl.h \
+		PID.cpp \
+		PID.hpp \
+		Encoder.cpp \
+		Encoder.hpp
+
+LIB_DEPENDENCIES = \
 		library/BusDevice.h \
 		library/BusDevice.cpp \
 		library/gpio.h \
@@ -21,13 +29,13 @@ DEPENDENCIES = \
 		library/util.h \
 		library/util.cpp
 
-all: Driver
+all: $(TARGET)
 
-Driver:	Driver.o 
+MotorControl:	$(TARGET).o 
 	$(CC) -o $(TARGET) $(CFLAGS) $(TARGET).o $(LIBS)
 
-Driver.o:	Driver.cpp PID.cpp PID.hpp Encoder.cpp Encoder.hpp $(DEPENDENCIES)
+MotorControl.o:	$(DEPENDENCIES) $(LIB_DEPENDENCIES)
 	$(CC) $(CFLAGS) -c $(TARGET).cpp
 
 clean:
-	rm -f Driver *.o
+	rm -f $(TARGET) *.o

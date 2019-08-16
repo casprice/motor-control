@@ -11,17 +11,17 @@
  */
 class I2CDevice {
 protected:
-	unsigned int bus;     // the bus number
-	unsigned int address; // the device number on the bus
-	int file;             // the file handle to the device
+  unsigned int bus;     // the bus number
+  unsigned int address; // the device number on the bus
+  int file;             // the file handle to the device
 
 public:
-	I2CDevice(unsigned int a_bus, unsigned int a_device);
-	int openDevice(void);
-	int writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb);
-	int readRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb);
-	void closeDevice(void);
-	~I2CDevice(void);
+  I2CDevice(unsigned int a_bus, unsigned int a_device);
+  int openDevice(void);
+  int writeRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb);
+  int readRegister(unsigned char * buffer, unsigned int lsb, unsigned int msb);
+  void closeDevice(void);
+  ~I2CDevice(void);
 };
 
 #include "I2CDevice.cpp"

@@ -7,9 +7,9 @@
  *             device - the device number
  */
 BusDevice::BusDevice(unsigned int bus, unsigned int device) {
-	this->bus = bus;
-	this->device = device;
-	this->file=-1;
+  this->bus = bus;
+  this->device = device;
+  this->file=-1;
 }
 
 /**

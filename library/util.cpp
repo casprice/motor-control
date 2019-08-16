@@ -36,18 +36,18 @@ using namespace std;
  * @return
  */
 int write(string path, string filename, string value){
-   ofstream fs;
-   fs.open((path + filename).c_str());
-   if (!fs.is_open()){
-      printf("Write Problem: "); 
-      printf((path + filename).c_str());
-      printf("\n");
-	   perror("GPIO: write failed to open file ");
-	   return -1;
-   }
-   fs << value;
-   fs.close();
-   return 0;
+  ofstream fs;
+  fs.open((path + filename).c_str());
+  if (!fs.is_open()){
+    printf("Write Problem: "); 
+    printf((path + filename).c_str());
+    printf("\n");
+    perror("GPIO: write failed to open file ");
+    return -1;
+  }
+  fs << value;
+  fs.close();
+  return 0;
 }
 /**
  * Helper read function that reads a single string value to a file from the path provided
@@ -56,18 +56,18 @@ int write(string path, string filename, string value){
  * @return
  */
 string read(string path, string filename){
-   ifstream fs;
-   fs.open((path + filename).c_str());
-   if (!fs.is_open()){
-      printf("Read Problem: ");
-      printf((path + filename).c_str());
-      printf("\n");
-	   perror("GPIO: read failed to open file ");
-    }
-   string input;
-   getline(fs,input);
-   fs.close();
-   return input;
+  ifstream fs;
+  fs.open((path + filename).c_str());
+  if (!fs.is_open()){
+    printf("Read Problem: ");
+    printf((path + filename).c_str());
+    printf("\n");
+    perror("GPIO: read failed to open file ");
+  }
+  string input;
+  getline(fs,input);
+  fs.close();
+  return input;
 }
 
 /**
@@ -78,7 +78,7 @@ string read(string path, string filename){
  * @return
  */
 int write(string path, string filename, int value){
-   stringstream s;
-   s << value;
-   return write(path,filename,s.str());
+  stringstream s;
+  s << value;
+  return write(path,filename,s.str());
 }

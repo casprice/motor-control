@@ -11,8 +11,8 @@
  *             freq - the PWM frequency
  */
 PWM::PWM(int motorNum, int freq) {
-	num = motorNum;
-	rc_pwm_init(ss[num-1], freq); 
+  num = motorNum;
+  rc_pwm_init(pwm_ss[num-1], freq); 
 }
 
 /**
@@ -22,15 +22,15 @@ PWM::PWM(int motorNum, int freq) {
  * Return value: -1 if an error occurred, 0 otherwise
  */
 int PWM::setDutyCycle(double duty) {
-	if (duty > 1.0) duty = 1.0;
-	else if (duty < 0.0) duty = 0.0;
+  if (duty > 1.0) duty = 1.0;
+  else if (duty < 0.0) duty = 0.0;
 
-	if (rc_pwm_set_duty(ss[num-1], ch[num-1], duty) == -1) {
-		cerr << "Error in setDutyCycle for motor #" << num << endl;
-		return -1;
-	}
+  if (rc_pwm_set_duty(pwm_ss[num-1], pwm_ch[num-1], duty) == -1) {
+    cerr << "Error in setDutyCycle for motor #" << num << endl;
+    return -1;
+  }
 
-	return 0;
+  return 0;
 }
 
 /**
@@ -39,5 +39,5 @@ int PWM::setDutyCycle(double duty) {
  * Parameters: None
  */
 PWM::~PWM(void) {
-	rc_pwm_cleanup(ss[num-1]);
+  rc_pwm_cleanup(pwm_ss[num-1]);
 }

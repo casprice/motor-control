@@ -3,12 +3,12 @@
 
 class BusDevice {
 protected:
-	unsigned int bus;   
-	unsigned int device;
-	int file;           
+  unsigned int bus;   
+  unsigned int device;
+  int file;           
 public:
-	BusDevice(unsigned int bus, unsigned int device);
-	~BusDevice();
+  BusDevice(unsigned int bus, unsigned int device);
+  ~BusDevice();
 };
 
 #include "BusDevice.cpp"

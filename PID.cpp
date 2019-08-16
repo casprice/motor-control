@@ -7,6 +7,7 @@
 
 #include "PID.hpp"
 
+#define FREQ 20000 // 20 kHz
 #define MIN_DUTY 0.0
 #define MAX_DUTY 1.0
 #define MIN_ANGLE -95
@@ -23,7 +24,11 @@
  *             a_Ki - PID integral argument
  *             a_Kd - PID derivative argument
  */
-PID::PID(double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
+PID::PID(int motorNum, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
+  // Initialize pins
+  pwmPin = new PWM(motorNum, FREQ);
+  dirPin = new GPIO(direction_vals[motorNum-1]);
+  enablePin = new GPIO(enable_vals[motorNum-1]);
   encoder = enc;
   dutyCycle = 0;
   filter = RC_FILTER_INITIALIZER;
@@ -47,7 +52,7 @@ PID::PID(double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
  *             invert - whether to invert the direction of the motor
  * Return value: None.
  */
-void PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
+void PID::updatePWM(int goalAngle, bool invert) {
   // Check that goal angle does not exceed limits
   clip(goalAngle, MIN_ANGLE, MAX_ANGLE, 1);
 
@@ -56,13 +61,13 @@ void PID::updatePWM(PWM* pwm, GPIO* dir, int goalAngle, bool invert) {
 
   // Adjusts direction depending on the sign of dutyCycle
   if((dutyCycle < 0) != invert) {
-    dir->setValue(GPIO::HIGH);
+    dirPin->setValue(GPIO::HIGH);
   } else {
-    dir->setValue(GPIO::LOW);
+    dirPin->setValue(GPIO::LOW);
   }
   
   // Set new duty cycle using the magnitude
-  pwm->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY, 0));
+  pwmPin->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY, 0));
 }
 
 /**

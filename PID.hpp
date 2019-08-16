@@ -10,29 +10,36 @@
 #include <rc/math/filter.h>
 using namespace std;
 
+#include "MotorControl.h"
 #include "Encoder.hpp"
-#include "library/gpio.h"
 #include "library/pwm.h"
-
+#include "library/gpio.h"
 
 class PID {
-    private:
-        double dutyCycle;
-        shared_ptr<Encoder> encoder;
-        rc_filter_t filter;
+  private:
+    double dutyCycle;
+    shared_ptr<Encoder> encoder;
+    rc_filter_t filter;
+    PWM* pwmPin;
+    GPIO* dirPin;
+    GPIO* enablePin;
 
-    public:
-        PID(double Kp=0, double Ki=0, double Kd=0, shared_ptr<Encoder> enc=NULL);
-        
-        void updatePWM(PWM* pwm, GPIO* pin, int goalAngle, bool invert);
-        double getDutyCycle(void);
-        double getCurrent(int ch);
-        double getTorque(int ch);
-        void setTorque(void);
-        void setAngle(void);
-        double clip(double number, int min, int max, int err);
+  public:
+    PID(int motorNum, 
+        double Kp=0, 
+        double Ki=0, 
+        double Kd=0, 
+        shared_ptr<Encoder> enc=NULL);
+    
+    void updatePWM(int goalAngle, bool invert);
+    double getDutyCycle(void);
+    double getCurrent(int ch);
+    double getTorque(int ch);
+    void setTorque(void);
+    void setAngle(void);
+    double clip(double number, int min, int max, int err);
 
-        ~PID(void);
+    ~PID(void);
 };
 
 #include "PID.cpp"

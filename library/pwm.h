@@ -8,15 +8,13 @@
  * @brief A class to control a basic PWM output
  */
 class PWM {
-	private:
-		int num;  // which motor we're controlling
-		int ss[NUM_MOTORS] = { 2,   2,   1 };   // subsystem
-		int ch[NUM_MOTORS] = {'B', 'A', 'B'};  // channel
+  private:
+    int num;  // which motor we're controlling
 
-	public:
-		PWM(int motorNum, int freq);
-		int setDutyCycle(double duty);
-		~PWM();
+  public:
+    PWM(int motorNum, int freq);
+    int setDutyCycle(double duty);
+    ~PWM();
 };
 
 #include "pwm.cpp"

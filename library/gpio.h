@@ -43,32 +43,32 @@ typedef int (*CallbackType)(int);
  */
 class GPIO {
 public:
-	enum DIRECTION{ INPUT, OUTPUT };
-	enum VALUE{ LOW=0, HIGH=1 };
+  enum DIRECTION{ INPUT, OUTPUT };
+  enum VALUE{ LOW=0, HIGH=1 };
 
 private:
-	int number;			// The GPIO number of the object
-	string name;		// The name of the GPIO e.g. gpio50
-	string path;  	// The full path to the GPIO e.g. /sys/class/gpio/gpio50/
+  int number;			// The GPIO number of the object
+  string name;		// The name of the GPIO e.g. gpio50
+  string path;  	// The full path to the GPIO e.g. /sys/class/gpio/gpio50/
 
 public:
-	GPIO(int number);
-	int getNumber() { return number; } // Returns the GPIO number as an int.
+  GPIO(int number);
+  int getNumber() { return number; } // Returns the GPIO number as an int.
 
-	// General Input and Output Settings
-	int setUpPin(void);
-	int setDirection(GPIO::DIRECTION);
-	int setValue(GPIO::VALUE);
-	GPIO::VALUE getValue();
-	GPIO::DIRECTION getDirection();
-	int exportGPIO();
-	int unexportGPIO();
+  // General Input and Output Settings
+  int setUpPin(void);
+  int setDirection(GPIO::DIRECTION);
+  int setValue(GPIO::VALUE);
+  GPIO::VALUE getValue();
+  GPIO::DIRECTION getDirection();
+  int exportGPIO();
+  int unexportGPIO();
 
-	~GPIO();  //destructor will unexport the pin
+  ~GPIO();  //destructor will unexport the pin
 
 private:
-	ofstream stream;
-	pthread_t thread;
+  ofstream stream;
+  pthread_t thread;
 };
 
 #include "gpio.cpp"

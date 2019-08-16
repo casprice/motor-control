@@ -18,7 +18,6 @@
 #include "library/util.h"
 using namespace std;
 
-#define FREQ 20000 // 20 kHz
 #define STEP 1
 
 static int running = 0;
@@ -47,7 +46,7 @@ void setup(void) {
  * Main driver of the motor control for the snake.
  */
 int main() {
-  int value = 0;   // angle we want motor to spin to
+  double value = 0.0;   // angle we want motor to spin to
   char buf[20];    // buffer to print angle and position vals
 
   // Register keyboard interrupt
@@ -57,24 +56,13 @@ int main() {
   // Set up environment
   setup();
 
-  // GPIO/PWM setup
-  PWM pwm1(M1_PWM, FREQ);
-  GPIO dir1(M1_DIR);
-  GPIO enable1(M1_ENABLE);
-  PWM pwm2(M2_PWM, FREQ);
-  GPIO dir2(M2_DIR);
-  GPIO enable2(M2_ENABLE);
-  PWM pwm3(M3_PWM, FREQ);
-  GPIO dir3(M3_DIR);
-  GPIO enable3(M3_ENABLE);
-
   // Encoder setup
-  shared_ptr<Encoder> enc1(new Encoder(2, 0x40));
-  //shared_ptr<Encoder> enc2(new Encoder(2, 0x41));
+  //shared_ptr<Encoder> enc1(new Encoder(2, 0x40));
+  shared_ptr<Encoder> enc2(new Encoder(2, 0x41));
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
-  // Create new PID and Encoder controllers
-  PID pidCtrl(0.08, 0.0, 0.0, enc1);
+  // PID setup
+  shared_ptr<PID> pid1(new PID(0.08, 0.0, 0.0, enc2));
   
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");
@@ -96,13 +84,13 @@ int main() {
     clear(); // refresh the terminal window
 
     // Exit the control loop if no longer reading encoder.
-    if (enc1->calcRotation() == -1) {
+    if (enc2->calcRotation() == -1) {
       running = 0;
       continue;
     }
 
-    double angle = enc1->getAngle();
-    pidCtrl.updatePWM(&pwm3, &dir3, value, true);
+    double angle = enc2->getAngle();
+    pid1.updatePWM(&pwm3, &dir3, value, true);
 
     sprintf(buf, "Angle: %d", value);
     mvaddstr(0, 1, buf);
