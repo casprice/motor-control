@@ -2,6 +2,19 @@
 #define MOTORCONTROL_H
 
 #include <thread>
+#include <iostream>
+#include <vector>
+#include <memory>
+
+#include "MotorControl.h"
+#include "Encoder.hpp"
+#include "PID.hpp"
+#include "library/gpio.h"
+#include "library/pwm.h"
+#include "library/util.h"
+using namespace std;
+
+#define NUM_MOTORS 3
 
 // P8_13, P8_19, P9_16
 int pwm_ss[] = { 2,   2,   1 };  // subsystem
@@ -26,6 +39,8 @@ int Kp = 0.08,
 class MotorControl {
   public:
     int interval;
+    vector<shared_ptr<Encoder>> encoders;
+    vector<shared_ptr<PID>> pidctrls;
 
     MotorControl();
     void start();

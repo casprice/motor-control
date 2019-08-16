@@ -4,7 +4,7 @@
 # or
 #       make clean              # This will safely remove old stuff
 CC = g++
-CFLAGS = -Wall -pedantic -g -pthread
+CFLAGS = -Wall -pedantic -g -std=c++11 -pthread
 LIBS = -lncurses /usr/lib/librobotcontrol.so
 
 TARGET = MotorControl

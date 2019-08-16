@@ -58,7 +58,7 @@ int main() {
 
   // Encoder setup
   //shared_ptr<Encoder> enc1(new Encoder(2, 0x40));
-  shared_ptr<Encoder> enc2(new Encoder(2, 0x41));
+  shared_ptr<Encoder> enc2(new Encoder(2, enc_addr[0]));
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
   // PID setup
