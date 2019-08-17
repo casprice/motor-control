@@ -10,7 +10,7 @@
 #include <rc/math/filter.h>
 using namespace std;
 
-#include "MotorControl.h"
+#include "Driver.hpp"
 #include "Encoder.hpp"
 #include "library/pwm.h"
 #include "library/gpio.h"
