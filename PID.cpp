@@ -81,6 +81,14 @@ double PID::getDutyCycle(void) {
 }
 
 /**
+ * 
+ */
+int PID:: setDuty(double duty) {
+  dutyCycle = duty;
+  return pwmPin->setDutyCycle(duty);
+}
+
+/**
  * Routine name: getCurrent(int ch)
  * Description:
  * Parameters:

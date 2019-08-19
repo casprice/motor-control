@@ -68,7 +68,7 @@ class pid_ctl_dir_en:
         self.previous_error = 0
     def update(self, current, goal, dir_inverted=False):
         #adjusted_duty = (self.p*(goal-current)) + (self.i*self.total_error) + (self.d*self.previous_error)
-        adjusted_duty = 10
+        adjusted_duty = 30
         if 'bbb_test' in build_params:
             # direction
             if ((adjusted_duty < 0) != dir_inverted):
@@ -130,7 +130,7 @@ def main():
         GPIO.output(pin_map["enable"], GPIO.HIGH)
         # set frequency of PWM to 20khz
         # pwm.start(channel, duty, frequency, polarity=0)
-        PWM.start(pin_map["pwm"], 0, 20000) 
+        PWM.start(pin_map["pwm"], 0, 20000)
 
     # pid setup (Kp, Kd, Ki)
     pid_ctl = pid_ctl_dir_en(0.8, 0.0, 0.0)
@@ -156,7 +156,7 @@ def main():
 
         temp_list = 8192
         #temp_list = (i2c_device.getAngle()[0] << 6) + (i2c_device.getAngle()[1] & 0x3F)
-        
+
         stdscr.addstr(1,1, "Postion: {}".format(truncate(i2c_device.toDegree(temp_list)-180, 3)))
         # pid section
         pid_ctl.update(current=i2c_device.toDegree(temp_list) - 180, goal=value, dir_inverted=False)

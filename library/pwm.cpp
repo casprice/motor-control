@@ -2,6 +2,7 @@
 #include <iostream>
 #include <rc/pwm.h>
 
+#include "../Driver.hpp"
 #include "pwm.h"
 
 /**
@@ -22,8 +23,12 @@ PWM::PWM(int motorNum, int freq) {
  * Return value: -1 if an error occurred, 0 otherwise
  */
 int PWM::setDutyCycle(double duty) {
-  if (duty > 1.0) duty = 1.0;
-  else if (duty < 0.0) duty = 0.0;
+  if (duty > 1.0) {
+    duty = 1.0;
+    cerr << "Duty cycle too high!";
+  } else if (duty < 0.0) {
+    duty = 0.0;
+  }
 
   if (rc_pwm_set_duty(pwm_ss[num-1], pwm_ch[num-1], duty) == -1) {
     cerr << "Error in setDutyCycle for motor #" << num << endl;

@@ -5,3 +5,5 @@ notes.txt
 tests/**/*.o
 snake_ctl/
 __MACOSX/
+testEncoder
+testPID

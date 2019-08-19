@@ -33,6 +33,7 @@ class PID {
     
     void updatePWM(int goalAngle, bool invert);
     double getDutyCycle(void);
+    int setDuty(double duty);
     double getCurrent(int ch);
     double getTorque(int ch);
     void setTorque(void);

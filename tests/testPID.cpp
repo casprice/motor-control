@@ -21,33 +21,28 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 }
 
 int main(void) {
-  double dutyCycle = 25.0; 
+  double dc = 0.40;
 
   // Set up Ctrl-C Interrupt handling
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  double dc = 0.30;
-
-  // GPIO/PWM setup
-  PWM pwm(20000);
-  pwm.setDutyCycle(dc);
-  GPIO dir(M3_DIR);
-  GPIO enable(M3_ENABLE);
-
   //shared_ptr<Encoder> enc(new Encoder);
 
-  PID* pidctl = new PID(2,0,0,NULL);
+  PID* pidctl = new PID(3, 0.08,0,0,NULL);
+  pidctl->setDuty(dc);
   
   // Output calculated angle
   while(running) {
+      /*
     pidctl->updatePWM(&pwm, 30);
     pidctl->updatePin(&dir, false);
     cout << "\r" << pidctl->getTorque(2);
-
+*/
+    
     fflush(stdout);
     sleep(1); // sleep for 1 second
   }
-    
+
   cout << endl;
 }
