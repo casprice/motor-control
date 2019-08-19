@@ -62,7 +62,8 @@ int main() {
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
   // PID setup
-  shared_ptr<PID> pid1(new PID(0.08, 0.0, 0.0, NULL));
+  shared_ptr<PID> pid1(new PID(3, 0.08, 0.0, 0.0, NULL));
+  pid1->setDuty(0.25);
 
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");
@@ -90,7 +91,7 @@ int main() {
     }
 */
     //double angle = enc2->getAngle();
-    pid1.updatePWM(value, true);
+    //pid1.updatePWM(value, true);
 
     sprintf(buf, "Angle: %d", value);
     mvaddstr(0, 1, buf);
