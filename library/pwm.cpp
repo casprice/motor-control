@@ -44,5 +44,6 @@ int PWM::setDutyCycle(double duty) {
  * Parameters: None
  */
 PWM::~PWM(void) {
+  rc_pwm_set_duty(pwm_ss[num-1], pwm_ch[num-1], 0);
   rc_pwm_cleanup(pwm_ss[num-1]);
 }

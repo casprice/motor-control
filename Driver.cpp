@@ -7,8 +7,8 @@
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
-#include <csignal>
 #include <curses.h>
+#include <unistd.h>
 
 #include "Driver.hpp"
 #include "Encoder.hpp"
@@ -45,9 +45,26 @@ void setup(void) {
 /**
  * Main driver of the motor control for the snake.
  */
-int main() {
+int main(int argc, char * argv[]) {
+  int c;
+  int motor = 1; // command line arg
   int value = 0;   // angle we want motor to spin to
   char buf[20];    // buffer to print angle and position vals
+
+  while ((c = getopt(argc, argv, "m:")) != -1) {
+    switch (c) {
+      case 'm':
+        motor = atoi(optarg);
+        if (motor < 1 || motor > 3) {
+          cerr << "invalid motor number" << endl;
+          return -1;
+        }
+        break;
+      default:
+        cerr << "default motor is motor #1" << endl;
+        break;
+    }
+  }
 
   // Register keyboard interrupt
   signal(SIGINT, __signal_handler);
@@ -62,8 +79,8 @@ int main() {
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
   // PID setup
-  shared_ptr<PID> pid1(new PID(3, 0.08, 0.0, 0.0, NULL));
-  pid1->setDuty(0.25);
+  shared_ptr<PID> pid1(new PID(motor, 0.08, 0.0, 0.0, NULL));
+  pid1->setDuty(0.03);
 
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");
@@ -80,6 +97,7 @@ int main() {
     }
     else if (ch == 'q') {
       running = 0;
+      continue;
     }
 
     clear(); // refresh the terminal window
@@ -95,6 +113,11 @@ int main() {
 
     sprintf(buf, "Angle: %d", value);
     mvaddstr(0, 1, buf);
+
+    memset(buf, '\0', sizeof(char));
+    sprintf(buf, "Motor #%d", motor);
+    mvaddstr(1, 1, buf);
+
     /*
     memset(buf, '\0', sizeof(char));
     sprintf(buf, "Position: %f", angle);

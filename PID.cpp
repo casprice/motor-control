@@ -142,4 +142,7 @@ double PID::clip(double number, int min, int max, int err) {
 PID::~PID(void) {
   rc_filter_free(&filter);
   rc_adc_cleanup();
+  delete pwmPin;
+  delete dirPin;
+  delete enablePin;
 }
