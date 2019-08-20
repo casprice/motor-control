@@ -6,10 +6,10 @@
 #define FREQ 20000 // 20 kHz
 #define STEP 1
 
-MotorControl::MotorControl(vector<shared_ptr<Encoder>> encs, 
-                           vector<shared_ptr<PID>> pids) {
-  encoders = encs;
-  pidctrls = pids;
+MotorControl::MotorControl(vector<shared_ptr<Encoder>> enc_list, 
+                           vector<shared_ptr<PID>> pid_list) {
+  encoder_list = enc_list;
+  pidctrl_list = pid_list;
 }
 
 MotorControl::~MotorControl() {
@@ -34,10 +34,10 @@ void MotorControl::stop() {
 
 void MotorControl::callback() {
   for (int i = 0; i < NUM_MOTORS; i++) {
-    if (encoders[i]->calcRotation() == -1) {
+    if (encoder_list[i]->calcRotation() == -1) {
       this->stop();
     }
-    pidctrls[i]->updatePWM(value, true);
+    pidctrl_list[i]->updatePWM(setpoint, true);
   }
 }
 
@@ -47,6 +47,3 @@ void MotorControl::worker() {
     this_thread::sleep_for(chrono::milliseconds(100));
   }
 }
-
-// remove after integrating with ROS
-int main() {}

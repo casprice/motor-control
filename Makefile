@@ -7,11 +7,12 @@ CC = g++
 CFLAGS = -Wall -pedantic -g -std=c++11 -pthread
 LIBS = -lncurses /usr/lib/librobotcontrol.so
 
-TARGET = Driver
+TARGET = main
 
 DEPENDENCIES = \
 		$(TARGET).cpp \
-		$(TARGET).hpp \
+		MotorControl.cpp \
+		MotorControl.h \
 		PID.cpp \
 		PID.hpp \
 		Encoder.cpp \

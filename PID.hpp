@@ -10,10 +10,16 @@
 #include <rc/math/filter.h>
 using namespace std;
 
-#include "Driver.hpp"
 #include "Encoder.hpp"
 #include "library/pwm.h"
 #include "library/gpio.h"
+
+// P8_15, P9_12, P8_36
+const int direction_vals[] = { 47, 60, 80 };
+// P8_14, P9_11, P8_35
+const int enable_vals[] = { 26, 30, 8 };
+// AIN1, AIN3, AIN5
+const int motor_adc[] = { 1, 3, 5 };
 
 class PID {
   private:
