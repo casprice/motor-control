@@ -1,15 +1,14 @@
-# Motor Control for the UCSD ARCLab NASA Robotic Snake 2019
+# Motor Control for the UCSD ARCLab NASA Robotic Snake
 
----
 ## Overview
 This repository contains the code for testing the motor control on the [Robotic Planetary Explorer](https://www.ucsdarclab.com/nasarobot) for UCSD Advanced Robotics and Controls Lab. This project is in direct collaboration with the Caltech-NASA Jet Propulsion Laboratory (Robotic Vehicles and Manipulators Group). 
 
 This project uses Beaglebone Blacks as embedded systems, each of which control 3 ESCON Module 50/5 motor drivers. Motor #1 controls the Archimedes screw body of the robotic snake, and Motors #2 and #3 control the U-joint. 
 
 Author: Casey Price
+
 Principal Investigator: Michael Yip
 
-----
 ## Setting Up
 First, give your Beaglebone Black an Internet connection by [connecting via USB](http://paulbupejr.com/beaglebone-black-internet-over-usb/). Make sure you can run 
 
@@ -41,7 +40,6 @@ Save and exit the file, and then run
     sudo apt-get upgrade
     sudo reboot
 
-----
 ## Usage
 To test the program, go to the project's main directory and run 
 
