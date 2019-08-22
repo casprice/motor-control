@@ -5,11 +5,11 @@
 build_params = ['bbb_test']
 
 # Motor 1
-pin_map = {
-	"pwm": "P8_13",
-	"enable": "P8_14",
-	"direction": "P8_15"
-}
+#pin_map = {
+#	"pwm": "P8_13",
+#	"enable": "P8_14",
+#	"direction": "P8_15"
+#}
 
 # Motor 2
 #pin_map = {
@@ -19,11 +19,11 @@ pin_map = {
 #}
 
 # Motor 3
-#pin_map = {
-#	"pwm": "P9_16",
-#	"enable": "P8_10",
-#	"direction": "P8_18"
-#}
+pin_map = {
+	"pwm": "P9_16",
+	"enable": "P8_10",
+	"direction": "P8_18"
+}
 
 # include
 import curses
