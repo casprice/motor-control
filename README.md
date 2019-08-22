@@ -2,9 +2,12 @@
 
 ---
 ## Overview
-This repository contains the code for testing the motor control on the [Robotic Planetary Explorer](https://www.ucsdarclab.com/nasarobot) for UCSD Advanced Robotics and Controls Lab. This project is in direct collaboration with the Caltech-NASA Jet Propulsion Laboratory (Robotic Vehicles and Manipulators Group).
+This repository contains the code for testing the motor control on the [Robotic Planetary Explorer](https://www.ucsdarclab.com/nasarobot) for UCSD Advanced Robotics and Controls Lab. This project is in direct collaboration with the Caltech-NASA Jet Propulsion Laboratory (Robotic Vehicles and Manipulators Group). 
 
-This project uses Beaglebone Blacks as embedded systems, each of which control 3 ESCON Module 50/5 motor drivers 
+This project uses Beaglebone Blacks as embedded systems, each of which control 3 ESCON Module 50/5 motor drivers. Motor #1 controls the Archimedes screw body of the robotic snake, and Motors #2 and #3 control the U-joint. 
+
+Author: Casey Price
+Principal Investigator: Michael Yip
 
 ----
 ## Setting Up
@@ -34,6 +37,8 @@ Under "Disable auto loading of virtual capes (emmc/video/wireless/adc)", *uncomm
 
 Save and exit the file, and then run
 
+    sudo apt-get update
+    sudo apt-get upgrade
     sudo reboot
 
 ----
@@ -42,11 +47,11 @@ To test the program, go to the project's main directory and run
 
     make
 
-to compile the files into an executable. This program takes in the flag -m as an argument, to be followed by the number of the motor you wish to control. For example:
+to compile the files into an executable. This program takes in an integer argument, representing the number of the motor you wish to control. For example:
 
-    ./Driver -m 2
+    ./Driver 2
 
-to control motor #2.
+will control motor #2.
 
 To clean up the project directory, run
 
