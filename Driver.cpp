@@ -80,7 +80,7 @@ int main(int argc, char * argv[]) {
 
   // PID setup
   shared_ptr<PID> pid1(new PID(motor, 0.08, 0.0, 0.0, NULL));
-  pid1->setDuty(0.03);
+  pid1->setDuty(0.1);
 
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");

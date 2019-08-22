@@ -13,20 +13,4 @@
 #define M3_DIR 80    // P8_36
 #define M3_ENABLE 8  // P8_35
 
-// P8_13, P8_19, P9_16
-int pwm_ss[] = { 2,   2,   1 };  // subsystem
-int pwm_ch[] = {'B', 'A', 'B'};  // channel
-
-// P8_15, P9_12, P8_36
-int direction_vals[] = { 47, 60, 80 };
-
-// P8_14, P9_11, P8_35
-int enable_vals[] = { 26, 30, 8 };
-
-// AIN1, AIN3, AIN5
-int motor_adc[] = { 1, 3, 5 };
-
-// Encoder addresses
-unsigned int enc_addr[] = { 0x40, 0x41, 0x42 };
-
 #endif
