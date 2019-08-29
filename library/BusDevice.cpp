@@ -11,8 +11,8 @@ BusDevice::BusDevice(I2CBus* a_bus, unsigned int a_address) {
   this->address = a_address;
 }
 
-unsigned char * BusDevice::readRegisters(unsigned int fromAddress) {
-  return this->bus->readRegisters(fromAddress);
+unsigned char * BusDevice::readRegisters(unsigned int reg) {
+  return this->bus->readRegisters(reg);
 }
 
 /**

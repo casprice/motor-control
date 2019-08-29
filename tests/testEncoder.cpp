@@ -29,13 +29,15 @@ int main(void) {
   while(running) {
     printf("\r");
 
+    theBus->scan(0x40);
     encoder1->calcRotation();
+    theBus->scan(0x41);
     encoder2->calcRotation();
     cout << "Encoder 1: " << encoder1->getAngle() << " | Encoder 2: " << encoder2->getAngle() << "    ";
 
     fflush(stdout);
     sleep(DT); // sleep for 1 second
   }
-  
+
   cout << endl;
 }

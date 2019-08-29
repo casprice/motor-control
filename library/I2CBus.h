@@ -14,11 +14,11 @@ class busTracker {
 
     // Protected constructor to prevent public call
     busTracker() {}
-  
+
   public:
     /**
      * Routine name: getInstance()
-     * Description: Creates an instance of an I2C bus tracker if one does not 
+     * Description: Creates an instance of an I2C bus tracker if one does not
      *              already exist, otherwise returns the existing tracker.
      * Parameters: a_bus - The number of the bus to be opened.
      *             a_address - The address of the device.
@@ -49,6 +49,7 @@ class I2CBus {
   public:
     I2CBus(unsigned int a_bus);
     int openDevice(void);
+    int scan(unsigned int addr);
     int writeRegister(unsigned char value);
     unsigned char* readRegisters(unsigned int fromAddress);
     void closeDevice(void);

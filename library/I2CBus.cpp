@@ -54,23 +54,31 @@ int I2CBus::openDevice(void) {
     return -1;
   }
 
-  // Initiate communication with the device
   /*
-  if(ioctl(file, I2C_SLAVE, address) < 0) {
-    perror("\n\rI2C: Failed to connect to the device");
-    return -1;
+  uint8_t value;
+  for(int addr = 1; addr < 127; addr++) {
+    if(ioctl(file, I2C_SLAVE, addr) >= 0) {
+        if(read(file, &value, sizeof(value)) == 1) {
+            cerr << hex << addr << endl;
+        }
+    }
   }*/
 
-  for(int addr = 1; addr < 127; addr++) {
-    ioctl(file, I2C_SLAVE, addr);
+  return 0;
+}
+
+int I2CBus::scan(unsigned int addr) {
+  // Initiate communication with the device
+  if(ioctl(file, I2C_SLAVE, addr) < 0) {
+    perror("\n\rI2C: Failed to connect to the device");
+    return -1;
   }
-  
   return 0;
 }
 
 /**
  * Routine name: writeRegister(unsigned char value)
- * Description: Writes a value to the I2C device. Used to set up the 
+ * Description: Writes a value to the I2C device. Used to set up the
  *              device to read from a particular address.
  * Parameters: value - the value to write to the device
  * Return value: 1 on failure to write, 0 on success.
@@ -78,7 +86,7 @@ int I2CBus::openDevice(void) {
 int I2CBus::writeRegister(unsigned char value) {
   unsigned char buffer[1];
   buffer[0] = value;
-  
+
   if (write(file, buffer, 1) != 1) {
     perror("\n\rI2C: Failed to write to the device");
     return -1;
@@ -89,7 +97,7 @@ int I2CBus::writeRegister(unsigned char value) {
 
 /**
  * Routine name: readRegisters(unsigned int fromAddress)
- * Description: Reads number of registers from a device. 
+ * Description: Reads number of registers from a device.
  * Parameters: fromAddress - the starting address to read from
  * Return value: a pointer of type unsigned char * that points to the first
  *               element in the block of registers.
@@ -119,7 +127,7 @@ void I2CBus::closeDevice(void) {
 
 /**
  * Routine name: ~I2CBus(void)
- * Description: Closes the file on destruction, provided that it has not 
+ * Description: Closes the file on destruction, provided that it has not
  *              already been closed.
  * Parameters: None.
  */
