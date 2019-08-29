@@ -16,14 +16,6 @@ class busTracker {
     busTracker() {}
 
   public:
-    /**
-     * Routine name: getInstance()
-     * Description: Creates an instance of an I2C bus tracker if one does not
-     *              already exist, otherwise returns the existing tracker.
-     * Parameters: a_bus - The number of the bus to be opened.
-     *             a_address - The address of the device.
-     * Return value: A pointer to the static instance of the bus tracker.
-     */
     static busTracker* getInstance() {
       if(!theTracker) {
         theTracker = new busTracker;

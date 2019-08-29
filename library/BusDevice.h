@@ -6,8 +6,8 @@ protected:
   I2CBus* bus;
   unsigned int address;
 public:
-  BusDevice(I2CBus* a_bus, unsigned int device);
-  unsigned char * readRegisters(unsigned int fromAddress);
+  BusDevice(I2CBus* a_bus, unsigned int a_address);
+  unsigned char * readRegisters(unsigned int reg);
   ~BusDevice();
 };
 

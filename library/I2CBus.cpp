@@ -22,7 +22,7 @@ busTracker* busTracker::theTracker = nullptr;
  */
 I2CBus::I2CBus(unsigned int a_bus) {
 	bus = a_bus;
-	file=-1;
+	file = -1;
   busTracker* theTracker = busTracker::getInstance();
 	openDevice();
 }
@@ -54,21 +54,11 @@ int I2CBus::openDevice(void) {
     return -1;
   }
 
-  /*
-  uint8_t value;
-  for(int addr = 1; addr < 127; addr++) {
-    if(ioctl(file, I2C_SLAVE, addr) >= 0) {
-        if(read(file, &value, sizeof(value)) == 1) {
-            cerr << hex << addr << endl;
-        }
-    }
-  }*/
-
   return 0;
 }
 
 int I2CBus::scan(unsigned int addr) {
-  // Initiate communication with the device
+  // Initiate communication with the device on a specified address
   if(ioctl(file, I2C_SLAVE, addr) < 0) {
     perror("\n\rI2C: Failed to connect to the device");
     return -1;
@@ -135,4 +125,6 @@ I2CBus::~I2CBus(void) {
 	if (file != -1) {
     close(file);
   }
+
+  delete theTracker;
 }
