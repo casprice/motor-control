@@ -7,8 +7,8 @@
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
-#include <csignal>
 #include <curses.h>
+#include <unistd.h>
 
 #include "Driver.hpp"
 #include "Encoder.hpp"
@@ -45,9 +45,38 @@ void setup(void) {
 /**
  * Main driver of the motor control for the snake.
  */
-int main() {
-  int value = 0;   // angle we want motor to spin to
+int main(int argc, char * argv[]) {
+  char *endPtr;    // Used as second param of strtol
+  int motor = 1;   // command line arg
+  int setpoint = 0;   // angle we want motor to spin to
   char buf[20];    // buffer to print angle and position vals
+
+  if (argc > 1) {
+    // If too many arguments, print usage statement
+    if (argc > 2) {
+      cerr << "Error: Invalid number of arguments. Usage:" << endl;
+      cerr << "  ./Driver [number]" << endl;
+      cerr << "  number: the motor number" << endl;
+      cerr << "    -- must be a valid integer" << endl;
+      cerr << "    -- must be in the interval [1, 3]" << endl;
+      return -1;
+    }
+
+    // Convert first argument to number and set as motor number
+    motor = strtol(argv[1], &endPtr, 10);
+
+    // If errno was set, motor is invalid number or contains non-numerical characters
+    if (errno || *endPtr != '\0') {
+      cerr << "Error: Invalid motor number. Aborting." << endl;
+      return -1;
+    }
+
+    // Check that motor is in range
+    if (motor < 1 || motor > 3) {
+      cerr << "Error: Motor number out of range. Aborting." << endl;
+      return -1;
+    }
+  }
 
   // Register keyboard interrupt
   signal(SIGINT, __signal_handler);
@@ -62,8 +91,8 @@ int main() {
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
   // PID setup
-  shared_ptr<PID> pid1(new PID(3, 0.08, 0.0, 0.0, NULL));
-  pid1->setDuty(0.25);
+  shared_ptr<PID> pid1(new PID(motor, 0.08, 0.0, 0.0, NULL));
+  pid1->setDuty(0.1);
 
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");
@@ -73,13 +102,14 @@ int main() {
     // Keyboard input
     int ch = getch();
     if (ch == KEY_LEFT) {
-      value -= STEP;
+      setpoint -= STEP;
     }
     else if (ch == KEY_RIGHT) {
-      value += STEP;
+      setpoint += STEP;
     }
     else if (ch == 'q') {
       running = 0;
+      continue;
     }
 
     clear(); // refresh the terminal window
@@ -91,10 +121,15 @@ int main() {
     }
 */
     //double angle = enc2->getAngle();
-    //pid1.updatePWM(value, true);
+    //pid1.updatePWM(setpoint, true);
 
-    sprintf(buf, "Angle: %d", value);
+    sprintf(buf, "Angle: %d", setpoint);
     mvaddstr(0, 1, buf);
+
+    memset(buf, '\0', sizeof(char));
+    sprintf(buf, "Motor #%d", motor);
+    mvaddstr(1, 1, buf);
+
     /*
     memset(buf, '\0', sizeof(char));
     sprintf(buf, "Position: %f", angle);

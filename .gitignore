@@ -1,5 +1,7 @@
 *.o
 Driver
+MotorControl
+main
 fpga/
 notes.txt
 tests/**/*.o

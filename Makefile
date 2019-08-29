@@ -11,7 +11,6 @@ TARGET = Driver
 
 DEPENDENCIES = \
 		$(TARGET).cpp \
-		$(TARGET).hpp \
 		PID.cpp \
 		PID.hpp \
 		Encoder.cpp \
