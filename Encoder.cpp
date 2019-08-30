@@ -40,9 +40,7 @@ int Encoder::calcRotation(void) {
   currAngle = fmod((convertNum(toDecimal(result), RAW_TO_DEG)) - zeroPosition, 360);
 
   // Account for overflow
-  if (currAngle < 0) {
-    currAngle += 360;
-  }
+  currAngle = currAngle < 0 ? currAngle + 360 : currAngle;
 
   // Set new angle within the bounds of -180 to 180 degrees
   currAngle -= 180;
