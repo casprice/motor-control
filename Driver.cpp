@@ -2,7 +2,6 @@
  * File: Driver.cpp
  */
 #include <signal.h>
-//#include <rc/time.h>
 #include <string>
 #include <sstream>
 #include <cstdio>
@@ -11,6 +10,8 @@
 #include <curses.h>
 #include <unistd.h>
 #include <cmath>
+#include <iostream>
+#include <fstream>
 
 #include "Driver.hpp"
 #include "Encoder.hpp"
@@ -54,6 +55,8 @@ int main(int argc, char * argv[]) {
   double Kd = 0.0;
   int setpoint = 0;   // angle we want motor to spin to
   char buf[20];    // buffer to print angle and position vals
+  ofstream angleReadings;
+  angleReadings.open("angleReadings.csv");
 
   if (argc == 1) {
       cerr << "Error: Invalid number of arguments. Usage:" << endl;
@@ -148,8 +151,9 @@ int main(int argc, char * argv[]) {
         }
 
         double angle = enc1->getAngle();
+        angleReadings << timeSinceStart << ", " << angle << "\n";
         setpoint = sin(timeSinceStart * 2 * M_PI * 3) * 60;
-        pid1->updatePWM(setpoint, true);
+        //pid1->updatePWM(setpoint, true);
     }
 
     if (duration >= 1.5 * DT * std::pow(10,6)) {
@@ -180,6 +184,7 @@ int main(int argc, char * argv[]) {
 
   //endwin();  // restore terminal from curses
 
+  angleReadings.close();
   delete theBus;
 
   return 0;
