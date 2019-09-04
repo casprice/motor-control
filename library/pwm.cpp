@@ -12,7 +12,7 @@
  */
 PWM::PWM(int motorNum, int freq) {
   num = motorNum;
-  rc_pwm_init(pwm_ss[num-1], freq); 
+  rc_pwm_init(pwm_ss[num-1], freq);
 }
 
 /**

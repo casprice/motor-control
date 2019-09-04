@@ -47,7 +47,8 @@ void setup(void) {
  */
 int main(int argc, char * argv[]) {
   char *endPtr;    // Used as second param of strtol
-  int motor = 1;   // command line arg
+  int motor = 2;   // command line arg
+  double Kp = 0.1;
   int setpoint = 0;   // angle we want motor to spin to
   char buf[20];    // buffer to print angle and position vals
 
@@ -56,14 +57,14 @@ int main(int argc, char * argv[]) {
     if (argc > 2) {
       cerr << "Error: Invalid number of arguments. Usage:" << endl;
       cerr << "  ./Driver [number]" << endl;
-      cerr << "  number: the motor number" << endl;
-      cerr << "    -- must be a valid integer" << endl;
-      cerr << "    -- must be in the interval [1, 3]" << endl;
+      cerr << "  number: the P in PID" << endl;
+      cerr << "    -- must be a valid floating point number" << endl;
+      cerr << "    -- must be in the interval [0, 10000]" << endl;
       return -1;
     }
 
     // Convert first argument to number and set as motor number
-    motor = strtol(argv[1], &endPtr, 10);
+    Kp = strtod(argv[1], &endPtr);
 
     // If errno was set, motor is invalid number or contains non-numerical characters
     if (errno || *endPtr != '\0') {
@@ -72,7 +73,7 @@ int main(int argc, char * argv[]) {
     }
 
     // Check that motor is in range
-    if (motor < 1 || motor > 3) {
+    if (Kp < 0 || Kp > 10000) {
       cerr << "Error: Motor number out of range. Aborting." << endl;
       return -1;
     }
@@ -86,13 +87,14 @@ int main(int argc, char * argv[]) {
   setup();
 
   // Encoder setup
-  //shared_ptr<Encoder> enc1(new Encoder(2, 0x40));
+  I2CBus* theBus = new I2CBus(2);
+  shared_ptr<Encoder> enc1(new Encoder(theBus, 0x40));
   //shared_ptr<Encoder> enc2(new Encoder(2, enc_addr[0]));
   //shared_ptr<Encoder> enc3(new Encoder(3, 0x41));
 
   // PID setup
-  shared_ptr<PID> pid1(new PID(motor, 0.08, 0.0, 0.0, NULL));
-  pid1->setDuty(0.1);
+  shared_ptr<PID> pid1(new PID(motor, Kp, 0.0, 0.0, enc1));
+  //pid1->setDuty(0.05);
 
   mvaddstr(0, 1, "Angle: 0");
   mvaddstr(1, 1, "Position: 0");
@@ -113,32 +115,33 @@ int main(int argc, char * argv[]) {
     }
 
     clear(); // refresh the terminal window
-/*
+
     // Exit the control loop if no longer reading encoder.
-    if (enc2->calcRotation() == -1) {
+    if (enc1->calcRotation() == -1) {
       running = 0;
       continue;
     }
-*/
-    //double angle = enc2->getAngle();
-    //pid1.updatePWM(setpoint, true);
+
+    double angle = enc1->getAngle();
+    pid1->updatePWM(50, true);
 
     sprintf(buf, "Angle: %d", setpoint);
     mvaddstr(0, 1, buf);
 
     memset(buf, '\0', sizeof(char));
-    sprintf(buf, "Motor #%d", motor);
-    mvaddstr(1, 1, buf);
-
-    /*
-    memset(buf, '\0', sizeof(char));
     sprintf(buf, "Position: %f", angle);
     mvaddstr(1, 1, buf);
-*/
+
+    memset(buf, '\0', sizeof(char));
+    sprintf(buf, "Kp: %f", Kp);
+    mvaddstr(2, 1, buf);
+
     sleep(DT);
   }
 
   endwin();  // restore terminal from curses
+
+  delete theBus;
 
   return 0;
 }

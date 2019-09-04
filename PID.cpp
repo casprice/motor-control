@@ -9,7 +9,7 @@
 
 #define FREQ 20000 // 20 kHz
 #define MIN_DUTY 0.0
-#define MAX_DUTY 1.0
+#define MAX_DUTY 0.9
 #define MIN_ANGLE -95
 #define MAX_ANGLE 95
 #define TORQUE_CONST 6.18 // mNm/A
@@ -18,7 +18,7 @@
 
 /**
  * Routine name: PID(double a_Kp, double a_Ki, double a_Kd)
- * Description: Copy constructor for PID. Assigns the PID values and initializes 
+ * Description: Copy constructor for PID. Assigns the PID values and initializes
  *              error values to 0.
  * Parameters: a_Kp - PID proportion argument
  *             a_Ki - PID integral argument
@@ -29,8 +29,8 @@ PID::PID(int motorNum, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc)
   pwmPin = new PWM(motorNum, FREQ);
   dirPin = new GPIO(direction_vals[motorNum-1]);
   enablePin = new GPIO(enable_vals[motorNum-1]);
-  encoder = enc;
   dutyCycle = 0;
+  encoder = enc;
   filter = RC_FILTER_INITIALIZER;
   // Initialize PID filter
   if (rc_filter_pid(&filter, Kp, Ki, Kd, 4*DT, DT)) {
@@ -65,9 +65,9 @@ void PID::updatePWM(int goalAngle, bool invert) {
   } else {
     dirPin->setValue(GPIO::LOW);
   }
-  
+
   // Set new duty cycle using the magnitude
-  pwmPin->setDutyCycle(clip(fabs(dutyCycle), MIN_DUTY, MAX_DUTY, 0));
+  setDuty(fabs(dutyCycle));
 }
 
 /**
@@ -81,7 +81,7 @@ double PID::getDutyCycle(void) {
 }
 
 /**
- * 
+ *
  */
 int PID:: setDuty(double duty) {
   dutyCycle = duty;
@@ -123,14 +123,14 @@ double PID::getTorque(int ch) {
  */
 double PID::clip(double number, int min, int max, int err) {
   if (number < min) {
-    number = min;
     if (err) cerr << "\nInvalid value: " << number << " cannot be lower than " << min;
+    number = min;
   }
   if (number > max) {
-    number = max;
     if (err) cerr << "\nInvalid value: " << number << " cannot be higher than " << max;
+    number = max;
   }
-  
+
   return number;
 }
 

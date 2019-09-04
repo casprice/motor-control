@@ -21,28 +21,29 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 }
 
 int main(void) {
-  double dc = 0.40;
+  double Kp = 0.1;
+  int setpoint = 90;
 
   // Set up Ctrl-C Interrupt handling
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  //shared_ptr<Encoder> enc(new Encoder);
+  I2CBus* theBus = new I2CBus(2);
+  shared_ptr<Encoder> enc(new Encoder(theBus, 0x40));
 
-  PID* pidctl = new PID(3, 0.08,0,0,NULL);
-  pidctl->setDuty(dc);
-  
+  shared_ptr<PID> pidctl(new PID(2, Kp, 0.0, 0.0, enc));
+  //pidctl->setDuty(dc);
+
   // Output calculated angle
   while(running) {
-      /*
-    pidctl->updatePWM(&pwm, 30);
-    pidctl->updatePin(&dir, false);
-    cout << "\r" << pidctl->getTorque(2);
-*/
-    
+    cout << endl << "Encoder: " << enc->getAngle() << " | ";
+    pidctl->updatePWM(setpoint, true);
+
     fflush(stdout);
     sleep(1); // sleep for 1 second
   }
+
+  delete theBus;
 
   cout << endl;
 }
