@@ -45,9 +45,9 @@ To test the program, go to the project's main directory and run
 
     make
 
-to compile the files into an executable. This program takes in an integer argument, representing the number of the motor you wish to control. For example:
+to compile the files into an executable. This program takes in an integer argument, representing the number of the motor you wish to control, and two doubles representing the P and D values in PID. For example:
 
-    ./Driver 2
+    ./testPID 3 0.5 0
 
 will control motor #2.
 
