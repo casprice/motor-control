@@ -55,11 +55,12 @@ class Encoder : public BusDevice {
      */
     Encoder(I2CBus* a_bus,
             int a_dt,
-            unsigned int a_address=DEFAULT_ADDRESS, 
+            unsigned int a_address, 
             double a_resolution=RESOLUTION) 
     : BusDevice(a_bus, a_address) {
       resolution = a_resolution;
       dt = a_dt;
+      cout << "Initialized encoder at address " << hex << a_address << endl;
       setZeroPosition();
     }
 

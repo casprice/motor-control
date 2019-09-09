@@ -25,6 +25,10 @@
  *             a_Kd - PID derivative argument
  */
 PID::PID(int motorNum, float dt, double Kp, double Ki, double Kd, shared_ptr<Encoder> enc) {
+  if (motorNum < 1 || motorNum > 3) {
+    cerr << "Error: Invalid motor number." << endl;
+    return;
+  }
   // Initialize pins
   pwmPin = new PWM(motorNum, FREQ);
   dirPin = new GPIO(direction_vals[motorNum-1]);
@@ -40,6 +44,21 @@ PID::PID(int motorNum, float dt, double Kp, double Ki, double Kd, shared_ptr<Enc
   if (rc_adc_init()) {
     cerr << "ERROR: failed to run rc_init_adc()\n";
   }
+}
+
+/**
+ *
+ */
+PID::PID(int motorNum) {
+  if (motorNum < 1 || motorNum > 3) {
+    cerr << "Error: Invalid motor number." << endl;
+    return;
+  }
+  // Initialize pins
+  pwmPin = new PWM(motorNum, FREQ);
+  dirPin = new GPIO(direction_vals[motorNum-1]);
+  enablePin = new GPIO(enable_vals[motorNum-1]);
+  dutyCycle = 0;
 }
 
 /**

@@ -21,23 +21,24 @@ int main(void) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
+  int addr1 = 0x40;
+  int addr2 = 0x41;
+
   I2CBus* theBus = new I2CBus(2);
-  Encoder* encoder1 = new Encoder(theBus, 0x40);
-  Encoder* encoder2 = new Encoder(theBus, 0x41);
+  Encoder* encoder1 = new Encoder(theBus, 0.001, addr1);
+  Encoder* encoder2 = new Encoder(theBus, 0.001, addr2);
 
   // Output calculated angle
   while(running) {
     printf("\r\r");
 
-    //theBus->scan(0x40);
     encoder1->calcRotation();
-    //theBus->scan(0x41);
     encoder2->calcRotation();
-    cout << "Encoder 1: " << encoder1->getAngle() <<
-        " | Encoder 2: " << encoder2->getAngle() << "    ";
+    cout << hex << addr1 << ": " << encoder1->getAngle() << " | " <<
+        hex << addr2 << ": " << encoder2->getAngle() << "    ";
 
     fflush(stdout);
-    sleep(DT); // sleep for 1 second
+    sleep(0.001); // sleep for 1 second
   }
 
   delete encoder1;

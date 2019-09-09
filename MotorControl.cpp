@@ -47,6 +47,7 @@ void MotorControl::callback() {
   for (int i = 0; i < pidctrl_list.size(); i++) {
     if (encoder_list[i]->calcRotation() == -1) {
       this->stop();
+      return;
     }
     pidctrl_list[i]->updatePWM(true);
   }
@@ -64,21 +65,21 @@ void MotorControl::worker() {
   chrono::time_point<chrono::system_clock> prevTime;
   chrono::time_point<chrono::system_clock> endTime;
 
-  chrono::microseconds elapsed_ms;
+  chrono::microseconds elapsed_us;
 
-  while (!shouldStop) {        
+  while (!shouldStop) {
     prevTime = chrono::system_clock::now();
     this->callback();
     endTime = chrono::system_clock::now();
 
     //convert to ms
-    elapsed_ms = std::chrono::duration_cast<chrono::microseconds>(endTime - prevTime);
+    elapsed_us = std::chrono::duration_cast<chrono::microseconds>(endTime - prevTime);
 
-    if (float(elapsed_ms.count())/float(dt.count()) >= 1.00) {
-      cout << "overrun" << endl;
+    if (elapsed_us.count() >= dt.count()) {
+      cout << "Motor Controller Timer Overrun" << endl;
     }
     else{
-      this_thread::sleep_for(dt - elapsed_ms);
+      this_thread::sleep_for(dt - elapsed_us);
     }
   }
 }

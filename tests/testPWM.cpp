@@ -1,5 +1,4 @@
 #include "../PID.hpp"
-#include "../Driver.hpp"
 #include <iostream>
 #include <signal.h>
 #include <rc/motor.h>
@@ -65,8 +64,8 @@ int main(int argc, char * argv[]) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  shared_ptr<PID> pidctl(new PID(motor, 0.0, 0.0, 0.0, NULL));
-  pidctl->setDuty(dc);
+  PID* motorCtl = new PID(motor);
+  motorCtl->setDuty(dc);
 
   // Output calculated angle
   while(running) {
@@ -75,5 +74,6 @@ int main(int argc, char * argv[]) {
     sleep(1); // sleep for 1 second
   }
 
+  delete motorCtl;
   cout << endl;
 }

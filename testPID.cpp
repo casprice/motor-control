@@ -20,7 +20,7 @@ static void __signal_handler(__attribute__ ((unused)) int dummy) {
 
 int main(int argc, char * argv[]) {
 	char *endPtr;    // Used as second param of strtol
-  int motor = 3;   // command line arg
+  int motor = 0;   // command line arg
   double Kp = 0.5;
   double Kd = 0.0;
   int setpoint = 0;   // angle we want motor to spin to
@@ -86,8 +86,8 @@ int main(int argc, char * argv[]) {
   //   mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, 0.0, Kd, mc->encoder_list[i])));
   // }
 
-    mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[1])));
-    mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(3, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
+    mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[motor-2])));
+    mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(motor, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
 
 
   mc->start();
@@ -100,8 +100,9 @@ int main(int argc, char * argv[]) {
   while(running) {
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI * 2.0) * 75.0;
-    //setPoint = 45;
+    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI) * 45.0;
+    //setPoint = 0;
+    //cout << "Encoder 1: " << mc->encoder_list[0]->getAngle() << endl;
 
     mc->pidctrl_list[0]->setAngle(setPoint);
     this_thread::sleep_for(chrono::milliseconds(ms_dt));

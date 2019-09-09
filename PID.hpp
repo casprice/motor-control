@@ -38,6 +38,7 @@ class PID {
         double Ki=0, 
         double Kd=0, 
         shared_ptr<Encoder> enc=NULL);
+    PID(int motorNum);
     
     void updatePWM(bool invert);
     void setAngle(double angle);

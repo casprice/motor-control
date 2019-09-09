@@ -1,6 +1,6 @@
 # This is the Makefile to use for the NASA Snake Robot Motor Controller
 # To use, at the prompt, type:
-#       make Driver             # This will make executable driver
+#       make testBB             # This will make executable driver
 # or
 #       make clean              # This will safely remove old stuff
 CC = g++
