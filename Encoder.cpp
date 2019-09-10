@@ -34,6 +34,10 @@ int Encoder::setZeroPosition(void) {
   return 0;
 }
 
+void Encoder::setZeroPosition(double pos) {
+  zeroPosition = pos;
+}
+
 /**
  * Routine name: Encoder::calcRotation(void)
  * Description: Get angle by reading angle registers, which outputs values

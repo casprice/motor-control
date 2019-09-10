@@ -61,10 +61,10 @@ class Encoder : public BusDevice {
       resolution = a_resolution;
       dt = a_dt;
       cout << "Initialized encoder at address " << hex << a_address << endl;
-      setZeroPosition();
     }
 
     int setZeroPosition(void);
+    void setZeroPosition(double pos);
     int calcRotation(void);
     double getZero(void);
     double getAngle(void);

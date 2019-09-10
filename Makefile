@@ -1,16 +1,22 @@
 # This is the Makefile to use for the NASA Snake Robot Motor Controller
 # To use, at the prompt, type:
-#       make testBB             # This will make executable driver
+#       make		            # This will make executable driver
 # or
 #       make clean              # This will safely remove old stuff
 CC = g++
 CFLAGS = -Wall -pedantic -g -std=c++11 -pthread
-LIBS = -lncurses /usr/lib/librobotcontrol.so
+LIBS = -lncurses \
+		/usr/lib/librobotcontrol.so \
+		inih/cpp/INIReader.h \
+		inih/cpp/INIReader.cpp \
+		inih/ini.c \
+		inih/ini.h
 
 TARGET = testBB
 
 DEPENDENCIES = \
 		$(TARGET).cpp \
+		testBB.h \
 		MotorControl.cpp \
 		MotorControl.h \
 		PID.cpp \
@@ -28,7 +34,7 @@ LIB_DEPENDENCIES = \
 		library/I2CBus.h \
 		library/I2CBus.cpp \
 		library/util.h \
-		library/util.cpp
+		library/util.cpp	
 
 all: $(TARGET)
 

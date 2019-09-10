@@ -47,7 +47,7 @@ PID::PID(int motorNum, float dt, double Kp, double Ki, double Kd, shared_ptr<Enc
 }
 
 /**
- *
+ * Copy constructor for motor only controlling duty cycle
  */
 PID::PID(int motorNum) {
   if (motorNum < 1 || motorNum > 3) {
