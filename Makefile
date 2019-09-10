@@ -7,7 +7,7 @@ CC = g++
 CFLAGS = -Wall -pedantic -g -std=c++11 -pthread
 LIBS = -lncurses /usr/lib/librobotcontrol.so
 
-TARGET = testPID
+TARGET = testBB
 
 DEPENDENCIES = \
 		$(TARGET).cpp \

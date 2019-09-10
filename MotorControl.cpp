@@ -24,8 +24,8 @@ void MotorControl::start() {
   }
 
   for (int i = 0; i < pidctrl_list.size(); i++) {
-       encoder_list[i]->calcRotation();
-       pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
+    encoder_list[i]->calcRotation();
+    pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
   }
 
   shouldStop = false;
@@ -36,9 +36,9 @@ void MotorControl::stop() {
   shouldStop = true;
 
   for (int i = 0; i < pidctrl_list.size(); i++) {
-     encoder_list[i]->calcRotation();
-     pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
-     pidctrl_list[i]->setDuty(0);
+    encoder_list[i]->calcRotation();
+    pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
+    pidctrl_list[i]->setDuty(0);
   }
 
 }

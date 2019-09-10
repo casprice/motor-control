@@ -72,6 +72,10 @@ PID::PID(int motorNum) {
  * Return value: None.
  */
 void PID::updatePWM(bool invert) {
+  if (encoder == NULL) {
+    cerr << "Encoder not shared with motor. Cannot update PWM." << endl;
+    return;
+  }
   // Check that goal angle does not exceed limits
   clip(goalAngle, MIN_ANGLE, MAX_ANGLE, 1);
 
@@ -89,53 +93,28 @@ void PID::updatePWM(bool invert) {
   setDuty(fabs(dutyCycle));
 }
 
-/**
- *
- */
 void PID::setAngle(double angle) {
   goalAngle = angle;
 }
 
-/**
- * Routine name: getDutyCycle(void)
- * Description:
- * Parameters: None
- * Return value:
- */
 double PID::getDutyCycle(void) {
   return dutyCycle;
 }
 
-/**
- *
- */
 int PID:: setDuty(double duty) {
   dutyCycle = duty;
   return pwmPin->setDutyCycle(duty);
 }
 
-/**
- * Routine name: getCurrent(int ch)
- * Description:
- * Parameters:
- * Return value:
- */
 double PID::getCurrent(int ch) {
   return rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
 }
 
-/**
- * 3 - AIN0
- * 4 - AIN1
- * 5 - AIN2
- * 6 - AIN3
- */
 double PID::getTorque(int ch) {
-  double current = rc_adc_read_volt(ch) * 1681/681 * 3.4/4;
+  double current = (rc_adc_read_volt(ch) * 1681.0/681.0 - 2.0) * 3.4/2.0;
 
   // Multiply by torque constant * gear ratio * gearbox efficiency
-  return current * (TORQUE_CONST/1000) * GEAR_RATIO * (GEARBOX_EFF/100);
-  //return rc_adc_read_volt(ch);
+  return current * (TORQUE_CONST/1000.0) * GEAR_RATIO * (GEARBOX_EFF/100.0);
 }
 
 /**
@@ -149,11 +128,9 @@ double PID::getTorque(int ch) {
  */
 double PID::clip(double number, int min, int max, int err) {
   if (number < min) {
-    //if (err) cerr << "\nInvalid value: " << number << " cannot be lower than " << min;
     number = min;
   }
   if (number > max) {
-    //if (err) cerr << "\nInvalid value: " << number << " cannot be higher than " << max;
     number = max;
   }
 
@@ -166,8 +143,10 @@ double PID::clip(double number, int min, int max, int err) {
  * Parameters: None.
  */
 PID::~PID(void) {
-  rc_filter_free(&filter);
-  rc_adc_cleanup();
+  if (encoder) {
+    rc_filter_free(&filter);
+    rc_adc_cleanup();
+  }
   delete pwmPin;
   delete dirPin;
   delete enablePin;

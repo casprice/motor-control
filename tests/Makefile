@@ -13,7 +13,9 @@ ENCODER = testEncoder
 
 PWM = testPWM
 
-all: testEncoder testPWM
+TORQUE = testTorque
+
+all: testEncoder testPWM testTorque
 
 testPWM: $(PWM).o
 	$(CC) -o $(PWM) $(CFLAGS) $(PWM).o /usr/lib/librobotcontrol.so
@@ -27,5 +29,11 @@ testEncoder: $(ENCODER).o
 testEncoder.o: $(ENCODER).cpp ../Encoder.cpp ../library/I2CBus.cpp
 	$(CC) $(CFLAGS) -c $(ENCODER).cpp
 
+testTorque: $(TORQUE).o
+	$(CC) -o $(TORQUE) $(CFLAGS) $(TORQUE).o /usr/lib/librobotcontrol.so
+
+testTorque.o: $(TORQUE).cpp ../PID.cpp ../Encoder.cpp
+	$(CC) $(CFLAGS) -c $(TORQUE).cpp
+
 clean:
-	rm -f $(ENCODER) $(PWM) *.o
+	rm -f $(ENCODER) $(PWM) $(TORQUE) *.o

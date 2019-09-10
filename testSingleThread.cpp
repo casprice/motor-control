@@ -1,11 +1,16 @@
-#include "MotorControl.h"
+#include <chrono>
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <signal.h>
+#include <thread>
+#include <vector>
+
 using namespace std;
 
-#define DT 0.0075
-#define DT_outter 0.015
+#include "Encoder.hpp"
+#include "PID.hpp"
+
+#define DT 0.004
 
 const unsigned int enc_addr[] = { 0x40, 0x41 };
 const unsigned int adc_ch[] = { 3, 5 };
@@ -24,9 +29,11 @@ int main(int argc, char * argv[]) {
   double dc = -1.0;
   double Kp = 0.5;
   double Kd = 0.0;
-  ofstream angleReadings;
-  angleReadings.open("angleReadings.csv");
-  angleReadings << "Time (us), M2 Angle (deg), M2 Torque (Nm), M3 Angle (deg), M3 Torque (Nm)\n";
+  ofstream m2_readings;
+  ofstream m3_readings;
+  ofstream angleReading_list[2] = { m2_readings, m3_readings };
+  m2_readings.open("m2_readings.csv");
+  m3_readings.open("m3_readings.csv");
 
   // Receive command-line arguments
   if (argc == 1) {
@@ -72,28 +79,27 @@ int main(int argc, char * argv[]) {
   running = 1;
 
   I2CBus* theBus = new I2CBus(2);
-  MotorControl* mc = new MotorControl(DT);
-
+  vector<shared_ptr<Encoder>> encoder_list;
+  vector<shared_ptr<PID>> pidctrl_list;
   PID* screw = new PID(1);
 
-   for (int i = 0; i < 2; i++) {
-     mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[i])));
-     mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, 0.0, Kd, mc->encoder_list[i])));
-   }
+  for (int i = 0; i < 2; i++) {
+    encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[i])));
+    pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, 0.0, Kd, encoder_list[i])));
+  }
 
-    //mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[motor-2])));
-    //mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(motor, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
-
-   // Start the motors
-   cout << "setting duty cycle of screw to " << dc << endl;
+  // Start the motors
+  cout << "setting duty cycle of screw to " << dc << endl;
   screw->setDuty(dc);
-  mc->start();
+  for (int i = 0; i < pidctrl_list.size(); i++) {
+    encoder_list[i]->calcRotation();
+    pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
+  }
 
-  double setPoint1 = 0;
-  double setPoint2 = 0;
+  double setPoint_list[2] = { 0, 0 };
   auto startTime = chrono::system_clock::now();
 
-  chrono::microseconds us_dt = chrono::microseconds(int(DT_outter*pow(10,6)));
+  chrono::microseconds us_dt = chrono::microseconds(int(DT*pow(10,6)));
 
   chrono::time_point<chrono::system_clock> prevTime;
   chrono::time_point<chrono::system_clock> endTime;
@@ -102,22 +108,23 @@ int main(int argc, char * argv[]) {
 
   while(running) {
     prevTime = chrono::system_clock::now();
-    
+
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    //setPoint1 = sin(double(timeSinceStart.count())/1000000.0 * M_PI - M_PI/2.0) * 25.0;
-    //setPoint2 = sin(double(timeSinceStart.count())/1000000.0 * M_PI ) * 25.0;
-    setPoint1 = 0;
-    setPoint2 = 0;
+    setPoint_list[0] = sin(double(timeSinceStart.count())/1000000.0 * M_PI - M_PI/2.0) * 25.0;
+    setPoint_list[1] = sin(double(timeSinceStart.count())/1000000.0 * M_PI ) * 25.0;
 
-    mc->pidctrl_list[0]->setAngle(setPoint1);
-    mc->pidctrl_list[1]->setAngle(setPoint2);
-
-    angleReadings << timeSinceStart.count() << ", " 
-        << mc->encoder_list[0]->getAngle() << ", " 
-        << mc->pidctrl_list[0]->getTorque(adc_ch[0]) << ", "
-        << mc->encoder_list[1]->getAngle() << ", " 
-        << mc->pidctrl_list[1]->getTorque(adc_ch[1]) << "\n";
+    for (int i = 0; i < pidctrl_list.size(); i++) {
+      if (encoder_list[i]->calcRotation() == -1) {
+        running = 0;
+        continue;
+      }
+      pidctrl_list[i]->setAngle(setPoint_list[i]);
+      pidctrl_list[i]->updatePWM(true);
+      angleReading_list[i] << timeSinceStart.count() << ", " 
+              << encoder_list[i]->getAngle() << ", " 
+              << pidctrl_list[i]->getTorque(adc_ch[i]) << "\n";
+    }
 
     endTime = chrono::system_clock::now();
 
@@ -133,10 +140,14 @@ int main(int argc, char * argv[]) {
   }
 
   screw->setDuty(0);
-  mc->stop();
-  angleReadings.close();
+  for (int i = 0; i < pidctrl_list.size(); i++) {
+    encoder_list[i]->calcRotation();
+    pidctrl_list[i]->setAngle(encoder_list[i]->getAngle());
+    pidctrl_list[i]->setDuty(0);
+  }
 
   delete screw;
   delete theBus;
-  delete mc;
+  m2_readings.close();
+  m3_readings.close();
 }

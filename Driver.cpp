@@ -1,5 +1,6 @@
 /**
  * File: Driver.cpp
+ * Runs PID control on one motor using the curses environment.
  */
 #include <signal.h>
 #include <string>
@@ -106,7 +107,7 @@ int main(int argc, char * argv[]) {
   double duration;
 
   // Set up environment
-  //setup();
+  setup();
 
   // Encoder setup
   I2CBus* theBus = new I2CBus(2);
@@ -118,14 +119,13 @@ int main(int argc, char * argv[]) {
   shared_ptr<PID> pid1(new PID(motor, Kp, 0.0, Kd, enc1));
   //pid1->setDuty(0.05);
 
-  //mvaddstr(0, 1, "Angle: 0");
-  //mvaddstr(1, 1, "Position: 0");
+  mvaddstr(0, 1, "Angle: 0");
+  mvaddstr(1, 1, "Position: 0");
 
   // Main control loop
   while (running) {
     duration = (double)(clock() - prevTime)/CLOCKS_PER_SEC * 1000000;
     // Keyboard input
-    /*
     int ch = getch();
     if (ch == KEY_LEFT) {
       setpoint -= STEP;
@@ -137,8 +137,8 @@ int main(int argc, char * argv[]) {
       running = 0;
       continue;
     }
-    */
-    //clear(); // refresh the terminal window
+    
+    clear(); // refresh the terminal window
 
 
     if (duration >= DT * std::pow(10,6)) {
@@ -159,7 +159,7 @@ int main(int argc, char * argv[]) {
     if (duration >= 1.5 * DT * std::pow(10,6)) {
         cout << "overrun" << endl;
     }
-    /*
+    
     sprintf(buf, "Angle: %d", setpoint);
     mvaddstr(0, 1, buf);
 
@@ -178,11 +178,11 @@ int main(int argc, char * argv[]) {
     memset(buf, '\0', sizeof(char));
     sprintf(buf, "Kd: %.6g", Kd);
     mvaddstr(4, 1, buf);
-*/
+
     usleep(50);
   }
 
-  //endwin();  // restore terminal from curses
+  endwin();  // restore terminal from curses
 
   angleReadings.close();
   delete theBus;

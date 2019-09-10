@@ -100,8 +100,8 @@ int main(int argc, char * argv[]) {
   while(running) {
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI) * 45.0;
-    //setPoint = 0;
+    //setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI) * 45.0;
+    setPoint = 0;
     //cout << "Encoder 1: " << mc->encoder_list[0]->getAngle() << endl;
 
     mc->pidctrl_list[0]->setAngle(setPoint);
