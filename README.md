@@ -41,13 +41,14 @@ Save and exit the file, and then run
     sudo reboot
 
 ## Usage
-To test the program, go to the project's main directory and run 
+To test the program, go to the project's main directory, clone the ini repo and compile: 
 
+    git clone https://github.com/benhoyt/inih.git
     make
 
 to compile the files into an executable. This program takes in an integer argument, representing the number of the motor you wish to control. For example:
 
-    ./Driver 2
+    ./testBB 2
 
 will control motor #2.
 

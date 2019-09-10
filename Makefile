@@ -11,6 +11,8 @@ TARGET = testBB
 
 DEPENDENCIES = \
 		$(TARGET).cpp \
+		MotorControl.cpp \
+		MotorControl.h \
 		PID.cpp \
 		PID.hpp \
 		Encoder.cpp \

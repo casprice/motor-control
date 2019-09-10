@@ -11,3 +11,5 @@ snake_ctl/
 __MACOSX/
 .Trash-1000/
 angleReadings.csv
+logs/
+inih/

@@ -51,6 +51,7 @@ void MotorControl::callback() {
     }
     pidctrl_list[i]->updatePWM(true);
   }
+  // cout << "Motor 1: " << pidctrl_list[0]->goalAngle << " | Motor 2: " << pidctrl_list[1]->goalAngle << endl;
 }
 
 void MotorControl::worker() {

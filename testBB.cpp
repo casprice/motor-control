@@ -1,60 +1,50 @@
-#include "MotorControl.h"
-#include <iostream>
-#include <vector>
-#include <memory>
-using namespace std;
-
-#define DT 0.0075
-#define DT_outter 0.015
-
-const unsigned int enc_addr[] = { 0x40, 0x41 };
-const unsigned int adc_ch[] = { 3, 5 };
-static int running = 0;
+#include "testBB.h"
 
 /**
- * Handle Ctrl-C interrupt
+ * Main method
  */
-static void __signal_handler(__attribute__ ((unused)) int dummy) {
-  running = 0;
-  return;
-}
-
 int main(int argc, char * argv[]) {
 	char *endPtr;    // Used as second param of strtol
   double dc = -1.0;
   double Kp = 0.5;
+  double Ki = 0.0;
   double Kd = 0.0;
+  // Log readings into csv file
   ofstream angleReadings;
   angleReadings.open("angleReadings.csv");
-  angleReadings << "Time (us), M2 Angle (deg), M2 Torque (Nm), M3 Angle (deg), M3 Torque (Nm)\n";
+  angleReadings << "Time (us), M2 Setpoint (deg), M2 Angle (deg), M2 Torque (Nm), M3 Setpoint (deg), M3 Angle (deg), M3 Torque (Nm)\n";
 
   // Receive command-line arguments
   if (argc == 1) {
       cerr << "Error: Invalid number of arguments. Usage:" << endl;
-      cerr << "  " << argv[0] << " [number] [Kp] [Ki]" << endl;
-      cerr << "  number: the duty cycle" << endl;
+      cerr << "  " << argv[0] << " [dc] [Kp] [Ki] [Kd]" << endl;
+      cerr << "  dc: the duty cycle" << endl;
       cerr << "    -- must be a valid floating point number" << endl;
       cerr << "    -- must be in the interval [0.0, 1.0]" << endl;
       cerr << "  Kp: the P in PID" << endl;
+      cerr << "    -- must be a valid floating point number" << endl;
+      cerr << "  Ki: the I in PID" << endl;
       cerr << "    -- must be a valid floating point number" << endl;
       cerr << "  Kd: the D in PID" << endl;
       cerr << "    -- must be a valid floating point number" << endl;
       return -1;
   } else {
-    // If too many arguments, print usage statement
-    if (argc > 4) {
+    if (argc > 5) {
       cerr << "Error: Invalid number of arguments." << endl;
       return -1;
     }
 
-    // Convert first argument to number and set as duty cycle for screw
     dc = strtod(argv[1], &endPtr);
     if (argc > 2) {
-        Kp = strtod(argv[2], &endPtr);
+      Kp = strtod(argv[2], &endPtr);
     }
     if (argc > 3) {
-        Kd = strtod(argv[3], &endPtr);
+      Ki = strtod(argv[3], &endPtr);
     }
+    if (argc > 4) {
+      Kd = strtod(argv[4], &endPtr);
+    }
+
     if (errno || *endPtr != '\0') {
       cerr << "Error: Invalid motor number. Aborting." << endl;
       return -1;
@@ -71,6 +61,7 @@ int main(int argc, char * argv[]) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
+  // Set up encoders and motor PID control
   I2CBus* theBus = new I2CBus(2);
   MotorControl* mc = new MotorControl(DT);
 
@@ -78,14 +69,11 @@ int main(int argc, char * argv[]) {
 
    for (int i = 0; i < 2; i++) {
      mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[i])));
-     mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, 0.0, Kd, mc->encoder_list[i])));
+     mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, Ki, Kd, mc->encoder_list[i])));
    }
 
-    //mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[motor-2])));
-    //mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(motor, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
-
-   // Start the motors
-   cout << "setting duty cycle of screw to " << dc << endl;
+  // Start the motors
+  cout << "setting duty cycle of screw to " << dc << endl;
   screw->setDuty(dc);
   mc->start();
 
@@ -100,23 +88,29 @@ int main(int argc, char * argv[]) {
 
   chrono::microseconds elapsed_us;
 
+  /*
+   * Control loop
+   */
   while(running) {
     prevTime = chrono::system_clock::now();
-    
+
+
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    //setPoint1 = sin(double(timeSinceStart.count())/1000000.0 * M_PI - M_PI/2.0) * 25.0;
-    //setPoint2 = sin(double(timeSinceStart.count())/1000000.0 * M_PI ) * 25.0;
-    setPoint1 = 0;
-    setPoint2 = 0;
+    setPoint1 = sin(double(timeSinceStart.count())/1000000.0 * M_PI/4.0) * 10.0;
+    setPoint2 = cos(double(timeSinceStart.count())/1000000.0 * M_PI/4.0) * 10.0;
+    //setPoint1 = 0;
+    //setPoint2 = 0;
 
     mc->pidctrl_list[0]->setAngle(setPoint1);
     mc->pidctrl_list[1]->setAngle(setPoint2);
 
-    angleReadings << timeSinceStart.count() << ", " 
-        << mc->encoder_list[0]->getAngle() << ", " 
+    angleReadings << timeSinceStart.count() << ", "
+        << setPoint1 << ", "
+        << mc->encoder_list[0]->getAngle() << ", "
         << mc->pidctrl_list[0]->getTorque(adc_ch[0]) << ", "
-        << mc->encoder_list[1]->getAngle() << ", " 
+        << setPoint2 << ", "
+        << mc->encoder_list[1]->getAngle() << ", "
         << mc->pidctrl_list[1]->getTorque(adc_ch[1]) << "\n";
 
     endTime = chrono::system_clock::now();
@@ -137,6 +131,6 @@ int main(int argc, char * argv[]) {
   angleReadings.close();
 
   delete screw;
-  delete theBus;
   delete mc;
+  delete theBus;
 }

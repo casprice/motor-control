@@ -64,7 +64,7 @@ class Encoder : public BusDevice {
       setZeroPosition();
     }
 
-    void setZeroPosition(void);
+    int setZeroPosition(void);
     int calcRotation(void);
     double getZero(void);
     double getAngle(void);

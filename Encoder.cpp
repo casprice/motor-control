@@ -13,9 +13,25 @@
  * Parameters: None.
  * Return value: -1 if error occurred, 0 if successful.
  */
-void Encoder::setZeroPosition(void) {
-  calcRotation();
-  zeroPosition = currAngle;
+int Encoder::setZeroPosition(void) {
+  unsigned char * result;
+  if ((result = BusDevice::readRegisters(ANGLMSB_REG)) == NULL) {
+    cerr << "\nLost connection to the encoder. Aborting." << endl;
+    return -1;
+  }
+
+  // Convert new reading to decimal and degrees, mod by 360
+  zeroPosition = fmod(convertNum(toDecimal(result), RAW_TO_DEG), 360);
+
+  // Account for overflow
+  zeroPosition = zeroPosition < 0 ? zeroPosition + 360 : zeroPosition;
+
+  // Set new angle within the bounds of -180 to 180 degrees
+  zeroPosition -= 180;
+
+  delete[] result;
+
+  return 0;
 }
 
 /**
@@ -44,6 +60,13 @@ int Encoder::calcRotation(void) {
 
   // Set new angle within the bounds of -180 to 180 degrees
   currAngle -= 180;
+
+  // TODO: deal with wraparound with fmod
+  if (fabs(currAngle - prevAngle) > 10) {
+    cerr << "Encoder " << hex << this->address << ": Unexpected angle value of " 
+         << currAngle  << ". Skipping and using " << prevAngle << endl;
+    currAngle = prevAngle;
+  }
 
   delete[] result;
 
