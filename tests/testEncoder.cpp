@@ -2,11 +2,6 @@
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
-#include <linux/i2c-dev.h>
-
-#include "../inih/cpp/INIReader.h"
-
-#define ZEROM1 
 
 using namespace std;
 
@@ -25,22 +20,14 @@ int main(void) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  INIReader reader("../config.ini");
-	if (reader.ParseError() < 0) {
-    throw runtime_error(string("cannot load config file."));
-  }
-
   int addr1 = 0x40;
   int addr2 = 0x41;
-
-  double ZeroAngleM2 = reader.GetReal("CONTROL", "ZeroAngleM2", -1);
-  double ZeroAngleM3 = reader.GetReal("CONTROL", "ZeroAngleM3", -1);
 
   I2CBus* theBus = new I2CBus(2);
   Encoder* encoder1 = new Encoder(theBus, 0.001, addr1);
   Encoder* encoder2 = new Encoder(theBus, 0.001, addr2);
-  encoder1->setZeroPosition(ZeroAngleM2);
-  encoder2->setZeroPosition(ZeroAngleM3);
+  encoder1->setZeroPosition();
+  encoder2->setZeroPosition();
 
   // Output calculated angle
   while(running) {

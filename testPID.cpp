@@ -70,25 +70,13 @@ int main(int argc, char * argv[]) {
   signal(SIGINT, __signal_handler);
   running = 1;
 
-  // Initialize encoder and PID lists
-	// vector<shared_ptr<Encoder>> encoder_list;
-	// encoder_list.resize(2);
-	// vector<shared_ptr<PID>> pidctrl_list;
-	// pidctrl_list.resize(3);
-
   I2CBus* theBus = new I2CBus(2);
   MotorControl* mc = new MotorControl(DT);
 
-	// shared_ptr<PID>(new PID(1, Kp, 0.0, Kd, NULL));
+  mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, 0x40)));
+  mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(motor, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
 
-  // for (int i = 0; i < 2; i++) {
-  //   mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[i], 16384.0)));
-  //   mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(i+2, DT, Kp, 0.0, Kd, mc->encoder_list[i])));
-  // }
-
-    mc->encoder_list.push_back(shared_ptr<Encoder>(new Encoder(theBus, DT, enc_addr[motor-2])));
-    mc->pidctrl_list.push_back(shared_ptr<PID>(new PID(motor, DT, Kp, 0.0, Kd, mc->encoder_list[0])));
-
+  mc->encoder_list[0]->setZeroPosition();
 
   mc->start();
 
@@ -100,9 +88,8 @@ int main(int argc, char * argv[]) {
   while(running) {
     auto timeSinceStart = chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now() - startTime);
 
-    //setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI) * 45.0;
-    setPoint = 0;
-    //cout << "Encoder 1: " << mc->encoder_list[0]->getAngle() << endl;
+    setPoint = sin(double(timeSinceStart.count())/1000000 * M_PI) * 25.0;
+    //setPoint = 0;
 
     mc->pidctrl_list[0]->setAngle(setPoint);
     this_thread::sleep_for(chrono::milliseconds(ms_dt));

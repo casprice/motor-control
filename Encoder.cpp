@@ -65,13 +65,6 @@ int Encoder::calcRotation(void) {
   // Set new angle within the bounds of -180 to 180 degrees
   currAngle -= 180;
 
-  // TODO: deal with wraparound with fmod
-  if (fabs(currAngle - prevAngle) > 10) {
-    cerr << "Encoder " << hex << this->address << ": Unexpected angle value of " 
-         << currAngle  << ". Skipping and using " << prevAngle << endl;
-    currAngle = prevAngle;
-  }
-
   delete[] result;
 
   return 0;

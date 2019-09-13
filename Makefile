@@ -12,7 +12,7 @@ LIBS = -lncurses \
 		inih/ini.c \
 		inih/ini.h
 
-TARGET = testBB
+TARGET = testPID
 
 DEPENDENCIES = \
 		$(TARGET).cpp \
